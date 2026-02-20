@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>King's Quest VR: The Magical Mishap</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', 'Lucida Console', monospace;
+            background: #000;
+            overflow: hidden;
+            color: #FFFFFF;
+        }
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        #canvas-container {
+            position: relative;
+            border: 4px solid #00AAAA;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0, 170, 170, 0.3);
+        }
+        /* Subtle Sierra-style scanline overlay */
+        #canvas-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.04) 2px,
+                rgba(0, 0, 0, 0.04) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        #text-area {
+            width: 640px;
+            max-width: 98vw;
+            height: 100px;
+            background: #000;
+            color: #FFF;
+            border: 4px solid #00AAAA;
+            margin-top: 8px;
+            padding: 8px 10px;
+            font-size: 14px;
+            overflow-y: auto;
+            line-height: 1.3;
+            box-shadow: inset 0 0 8px rgba(0, 170, 170, 0.15);
+        }
+        #text-area p {
+            margin: 2px 0;
+            padding: 0;
+        }
+        #input-area {
+            width: 640px;
+            max-width: 98vw;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+        #input-prompt {
+            color: #55FF55;
+            margin-right: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 6px rgba(85, 255, 85, 0.4);
+        }
+        #command-input {
+            flex: 1;
+            background: #000;
+            color: #55FF55;
+            border: 2px solid #00AAAA;
+            padding: 6px 8px;
+            font-family: 'Courier New', 'Lucida Console', monospace;
+            font-size: 16px;
+            outline: none;
+            caret-color: #55FF55;
+        }
+        #command-input:focus {
+            border-color: #55FFFF;
+            box-shadow: 0 0 8px rgba(85, 255, 255, 0.3);
+        }
+        #command-input:disabled {
+            color: #555555;
+            border-color: #333333;
+        }
+        #vr-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background: #5500AA;
+            color: #FFF;
+            border: 2px solid #AA00FF;
+            font-family: 'Courier New', 'Lucida Console', monospace;
+            cursor: pointer;
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: background 0.2s, box-shadow 0.2s;
+            z-index: 100;
+        }
+        @keyframes vrButtonPulse {
+            0%, 100% { box-shadow: 0 0 6px rgba(170, 0, 255, 0.4); }
+            50%  { box-shadow: 0 0 18px rgba(170, 0, 255, 0.8), 0 0 32px rgba(170, 0, 255, 0.25); }
+        }
+        #vr-button:not(:disabled) {
+            animation: vrButtonPulse 2.5s ease-in-out infinite;
+        }
+        #vr-button:hover {
+            background: #7700CC;
+            box-shadow: 0 0 12px rgba(170, 0, 255, 0.5);
+        }
+        #vr-button:disabled {
+            background: #222;
+            border-color: #444;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        #vr-button:active:not(:disabled) {
+            background: #9922FF;
+        }
+        .sierra-text {
+            color: #FFF;
+            text-shadow: 2px 2px #000;
+        }
+        #title-bar {
+            color: #00AAAA;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 170, 170, 0.6), 0 0 20px rgba(0, 170, 170, 0.2);
+            user-select: none;
+        }
+        /* Scrollbar styling for Sierra aesthetic */
+        #text-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        #text-area::-webkit-scrollbar-track {
+            background: #000;
+        }
+        #text-area::-webkit-scrollbar-thumb {
+            background: #00AAAA;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <button id="vr-button" disabled>Enter VR Mode</button>
+        <div id="title-bar">King&#x2019;s Quest VR &mdash; The Magical Mishap</div>
+        <div id="canvas-container">
+            <canvas id="game-canvas" width="640" height="400"></canvas>
+        </div>
+        <div id="text-area" class="sierra-text"></div>
+        <div id="input-area">
+            <span id="input-prompt" class="sierra-text">&gt;</span>
+            <input type="text" id="command-input" autocomplete="off" placeholder="Type a command..." />
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="js/game-engine.js"></script>
+    <script src="js/story-content.js"></script>
+    <script src="js/vr-controller.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
