@@ -1,4 +1,16 @@
 // Story Content - Rooms, Objects, and Puzzles
+
+// Seeded PRNG (Mulberry32) for deterministic scene rendering — prevents flicker on redraws.
+function seededRand(seed) {
+    let s = seed >>> 0;
+    return function () {
+        s += 0x6D2B79F5; s |= 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
 const STORY_CONTENT = {
     rooms: {
         castle_gate: {
@@ -376,10 +388,9 @@ const STORY_CONTENT = {
                 
                 // Window showing starry sky
                 gfx.fillRect(360, 140, 60, 70, game.BLACK);
-                // Stars
-                for (let i = 0; i < 12; i++) {
-                    gfx.drawPixel(365 + Math.random() * 50, 145 + Math.random() * 60, game.WHITE);
-                }
+                // Stars (fixed positions — avoids flicker on redraw)
+                const _wStars = [[6,8],[18,14],[32,5],[44,20],[9,35],[21,27],[38,42],[50,16],[12,50],[28,38],[42,8],[4,24]];
+                for (const [sx, sy] of _wStars) gfx.drawPixel(365 + sx, 145 + sy, game.WHITE);
             },
             onTalk: (game, noun) => {
                 if (noun && (noun.includes('wizard') || noun.includes('ignatius'))) {
@@ -697,15 +708,17 @@ const STORY_CONTENT = {
                 gfx.fillCircle(320, 315, 130, game.GREEN);
                 
                 // Flower patches
-                for (let i = 0; i < 20; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = 50 + Math.random() * 70;
-                    const x = 320 + Math.cos(angle) * dist;
-                    const y = 310 + Math.sin(angle) * (dist * 0.5);
-                    
-                    const colors = [game.RED, game.YELLOW, game.LIGHT_MAGENTA, game.WHITE];
-                    gfx.drawPixel(x, y, colors[Math.floor(Math.random() * colors.length)]);
-                    gfx.drawPixel(x + 1, y, game.LIGHT_GREEN);
+                {
+                    const flRng = seededRand(0xF10428);
+                    const flColors = [game.RED, game.YELLOW, game.LIGHT_MAGENTA, game.WHITE];
+                    for (let i = 0; i < 20; i++) {
+                        const angle = flRng() * Math.PI * 2;
+                        const dist  = 50 + flRng() * 70;
+                        const x = 320 + Math.cos(angle) * dist;
+                        const y = 310 + Math.sin(angle) * (dist * 0.5);
+                        gfx.drawPixel(x, y, flColors[Math.floor(flRng() * flColors.length)]);
+                        gfx.drawPixel(x + 1, y, game.LIGHT_GREEN);
+                    }
                 }
                 
                 // Rich soil in center (planting spot)
@@ -759,20 +772,8 @@ const STORY_CONTENT = {
                     }
                 }
             },
-            onUse: (game, noun) => {
-                if (noun && noun.includes('bean') && game.gameState.hasMagicBean && 
-                    game.gameState.wizardHappy && !game.gameState.beanstalkGrown) {
-                    game.displayText("You plant the magic bean in the fertile soil...");
-                    game.displayText("\nThe ground rumbles! The bean sprouts and grows...");
-                    game.displayText("and GROWS... and GROWS!");
-                    game.displayText("\nA massive beanstalk now reaches into the clouds!");
-                    game.displayText("You can CLIMB UP to reach the clouds!");
-                    game.gameState.beanstalkGrown = true;
-                    game.removeFromInventory('magic_bean');
-                    game.rooms.forest_clearing.exits.up = 'cloud_realm';
-                    game.addScore(30);
-                }
-            },
+            // NOTE: bean planting is handled by magic_bean.onUse (room.onUse is never
+            // called by the parser — only obj.onUse is invoked).
             onClimb: (game, noun) => {
                 if (noun && (noun.includes('beanstalk') || noun.includes('bean') || noun.includes('stalk'))) {
                     if (game.gameState.beanstalkGrown) {
@@ -912,11 +913,10 @@ const STORY_CONTENT = {
                     gfx.drawPixel(gnomeX + 18, gnomeY + 27, game.LIGHT_GREEN);
                 }
                 
-                // Mysterious fog
-                for (let i = 0; i < 20; i++) {
-                    const x = Math.random() * 640;
-                    const y = 260 + Math.random() * 40;
-                    gfx.drawPixel(x, y, game.LIGHT_GRAY);
+                // Mysterious fog (seeded — avoids flicker)
+                {
+                    const fogRng = seededRand(0xD3F09A);
+                    for (let i = 0; i < 20; i++) gfx.drawPixel(fogRng() * 640, 260 + fogRng() * 40, game.LIGHT_GRAY);
                 }
             },
             onTalk: (game, noun) => {
@@ -1026,12 +1026,17 @@ const STORY_CONTENT = {
                 gfx.fillRect(castleX + 55, castleY + 80, 30, 40, game.BROWN);
                 gfx.fillCircle(castleX + 70, castleY + 80, 15, game.BROWN);
                 
-                // Candy decorations (colorful dots)
-                for (let i = 0; i < 20; i++) {
-                    const colors = [game.RED, game.YELLOW, game.LIGHT_CYAN, game.WHITE];
-                    const x = castleX + 10 + Math.random() * 120;
-                    const y = castleY + 10 + Math.random() * 110;
-                    gfx.drawPixel(x, y, colors[Math.floor(Math.random() * colors.length)]);
+                // Candy decorations (colorful dots — seeded to avoid flicker)
+                {
+                    const ccRng = seededRand(0xC4A501);
+                    const ccColors = [game.RED, game.YELLOW, game.LIGHT_CYAN, game.WHITE];
+                    for (let i = 0; i < 20; i++) {
+                        gfx.drawPixel(
+                            castleX + 10 + ccRng() * 120,
+                            castleY + 10 + ccRng() * 110,
+                            ccColors[Math.floor(ccRng() * ccColors.length)]
+                        );
+                    }
                 }
                 
                 // Beanstalk top visible
@@ -1098,26 +1103,31 @@ const STORY_CONTENT = {
                     {x: goldX + 100, y: goldY + 60}
                 ], game.YELLOW);
                 
-                // Individual gold coins and treasures
-                for (let i = 0; i < 40; i++) {
-                    const x = goldX - 50 + Math.random() * 140;
-                    const y = goldY + 20 + Math.random() * 40;
-                    gfx.fillCircle(x, y, 4, game.YELLOW);
-                    // Coin highlight
-                    gfx.drawPixel(x - 1, y - 1, game.WHITE);
+                // Individual gold coins and treasures (seeded — avoids flicker on redraw)
+                {
+                    const coinRng = seededRand(0xD7A901);
+                    for (let i = 0; i < 40; i++) {
+                        const x = goldX - 50 + coinRng() * 140;
+                        const y = goldY + 20 + coinRng() * 40;
+                        gfx.fillCircle(x, y, 4, game.YELLOW);
+                        gfx.drawPixel(x - 1, y - 1, game.WHITE);
+                    }
                 }
-                
+
                 // Jewels in treasure
-                for (let i = 0; i < 15; i++) {
-                    const x = goldX - 40 + Math.random() * 120;
-                    const y = goldY + 15 + Math.random() * 35;
-                    const colors = [game.RED, game.CYAN, game.LIGHT_GREEN, game.LIGHT_MAGENTA];
-                    gfx.fillPolygon([
-                        {x: x, y: y - 3},
-                        {x: x - 3, y: y},
-                        {x: x, y: y + 3},
-                        {x: x + 3, y: y}
-                    ], colors[Math.floor(Math.random() * colors.length)]);
+                {
+                    const jewRng = seededRand(0xB4A502);
+                    const jewColors = [game.RED, game.CYAN, game.LIGHT_GREEN, game.LIGHT_MAGENTA];
+                    for (let i = 0; i < 15; i++) {
+                        const x = goldX - 40 + jewRng() * 120;
+                        const y = goldY + 15 + jewRng() * 35;
+                        gfx.fillPolygon([
+                            {x: x,     y: y - 3},
+                            {x: x - 3, y: y},
+                            {x: x,     y: y + 3},
+                            {x: x + 3, y: y}
+                        ], jewColors[Math.floor(jewRng() * jewColors.length)]);
+                    }
                 }
                 
                 // Gold chalices
@@ -1321,9 +1331,32 @@ const STORY_CONTENT = {
                 }
                 game.displayText("You take the magic bean. It glows faintly.");
                 game.addScore(15);
+            },
+            onUse: (game) => {
+                if (game.currentRoom !== 'forest_clearing') {
+                    game.displayText("Find some fertile soil to plant this in.");
+                    return;
+                }
+                if (!game.gameState.wizardHappy) {
+                    game.displayText("The bean glows feebly. Show it to the wizard first.");
+                    return;
+                }
+                if (game.gameState.beanstalkGrown) {
+                    game.displayText("The beanstalk is already growing magnificently!");
+                    return;
+                }
+                game.displayText("You plant the magic bean in the fertile soil...");
+                game.displayText("\nThe ground rumbles! The bean sprouts and grows...");
+                game.displayText("and GROWS... and GROWS!");
+                game.displayText("\nA massive beanstalk now reaches into the clouds!");
+                game.displayText("You can CLIMB UP to reach the clouds!");
+                game.gameState.beanstalkGrown = true;
+                game.removeFromInventory('magic_bean');
+                game.rooms.forest_clearing.exits.up = 'cloud_realm';
+                game.addScore(30);
             }
         },
-        
+
         golden_key: {
             name: 'golden key',
             description: 'An ornate golden key with a crown engraved on its handle. It looks important.',

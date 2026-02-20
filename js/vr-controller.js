@@ -195,7 +195,7 @@ class VRController {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.xr.enabled = true;
         this.renderer.shadowMap.enabled = false; // Disable shadows for Quest perf
-        this.renderer.outputColorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding;
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         // Room group (holds all room-specific objects for easy cleanup)
         this.roomGroup = new THREE.Group();
@@ -464,17 +464,12 @@ class VRController {
         // Reset fog and any per-room scene overrides
         this.scene.fog = null;
 
-        // Remove all objects from room group
+        // Only dispose geometries; materials are all shared via materialCache /
+        // flatMaterialCache (string-keyed Maps) — disposing them here would
+        // invalidate cached instances used by every future room.
         while (this.roomGroup.children.length > 0) {
             const child = this.roomGroup.children[0];
             this.roomGroup.remove(child);
-            if (child.geometry) child.geometry.dispose();
-            if (child.material) {
-                if (Array.isArray(child.material)) {
-                    child.material.forEach(m => { if (!this.materialCache.has(m)) m.dispose(); });
-                }
-            }
-            // Recursively dispose children
             child.traverse((obj) => {
                 if (obj.geometry) obj.geometry.dispose();
             });
@@ -1217,9 +1212,10 @@ class VRController {
 
         // Window showing starry sky
         this.addBox(3.5, 2.5, 1.5, 1.0, 1.2, 0.1, C.BLACK);
-        // Stars in window
+        // Stars in window (fixed positions — avoids pop on room rebuild)
+        const _wxRng = this._seededRng('wizard_stars');
         for (let i = 0; i < 8; i++) {
-            this.addSphere(3.2 + Math.random() * 0.6, 2.2 + Math.random() * 0.6, 1.45, 0.02, C.WHITE);
+            this.addSphere(3.2 + _wxRng() * 0.6, 2.2 + _wxRng() * 0.6, 1.45, 0.02, C.WHITE);
         }
 
         // Wizard NPC
@@ -1382,10 +1378,12 @@ class VRController {
         this.addTree(5.5, 1, 2.8, 1.0, 'deciduous');
 
         // Background trees (smaller)
+        // Background trees (seeded for stable layout)
+        const fpRng = this._seededRng('forest_path');
         for (let i = 0; i < 8; i++) {
             const side = i < 4 ? -1 : 1;
             const z = -6 + i * 2;
-            this.addTree(side * (6 + Math.random()), z, 2.5 + Math.random(), 0.9, i % 2 === 0 ? 'pine' : 'deciduous');
+            this.addTree(side * (6 + fpRng()), z, 2.5 + fpRng(), 0.9, i % 2 === 0 ? 'pine' : 'deciduous');
         }
 
         // Bushes along path
@@ -1394,19 +1392,21 @@ class VRController {
         this.addBush(-1.8, 4);
         this.addBush(2.2, -5);
 
-        // Flowers (small colored dots on ground)
+        // Flowers (seeded)
+        const fpFlRng = this._seededRng('forest_path_flowers');
         const flowerColors = [C.RED, C.YELLOW, C.LMAGENTA, C.WHITE];
         for (let i = 0; i < 20; i++) {
-            const fx = -6 + Math.random() * 12;
-            const fz = -6 + Math.random() * 12;
+            const fx = -6 + fpFlRng() * 12;
+            const fz = -6 + fpFlRng() * 12;
             if (Math.abs(fx) < 1.5) continue; // Don't place on path
             this.addSphere(fx, 0.08, fz, 0.04, flowerColors[i % flowerColors.length]);
         }
 
-        // Path stones
+        // Path stones (seeded)
+        const fpStRng = this._seededRng('forest_path_stones');
         for (let i = 0; i < 8; i++) {
             this.addBox(
-                (Math.random() - 0.5) * 1.5, 0.02, -5 + i * 1.5,
+                (fpStRng() - 0.5) * 1.5, 0.02, -5 + i * 1.5,
                 0.15, 0.04, 0.12, C.DGRAY
             );
         }
@@ -1443,31 +1443,34 @@ class VRController {
         this.roomGroup.add(sunLight);
 
         // Trees surrounding clearing (ring of trees)
+        const fcTrRng = this._seededRng('clearing_trees');
         for (let i = 0; i < 10; i++) {
             const angle = (i / 10) * Math.PI * 2;
-            const dist = 5.5 + Math.random() * 1.5;
+            const dist = 5.5 + fcTrRng() * 1.5;
             this.addTree(
                 Math.cos(angle) * dist,
                 Math.sin(angle) * dist,
-                3 + Math.random() * 2,
-                1.2 + Math.random() * 0.5,
+                3 + fcTrRng() * 2,
+                1.2 + fcTrRng() * 0.5,
                 i % 3 === 0 ? 'pine' : 'deciduous'
             );
         }
 
-        // Flowers
+        // Flowers (seeded)
+        const fcFlRng = this._seededRng('clearing_flowers');
         for (let i = 0; i < 30; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 1.5 + Math.random() * 3;
+            const angle = fcFlRng() * Math.PI * 2;
+            const dist = 1.5 + fcFlRng() * 3;
             const colors = [C.RED, C.YELLOW, C.LMAGENTA, C.WHITE, C.LCYAN];
             this.addSphere(
                 Math.cos(angle) * dist, 0.08, Math.sin(angle) * dist,
-                0.04, colors[Math.floor(Math.random() * colors.length)]
+                0.04, colors[Math.floor(fcFlRng() * colors.length)]
             );
         }
 
         // Beanstalk (if grown!)
         if (this.game.gameState.beanstalkGrown) {
+            const _bsRng = this._seededRng('beanstalk');
             // Massive twisting beanstalk going up to the sky
             const beanGroup = new THREE.Group();
             for (let i = 0; i < 25; i++) {
@@ -1490,7 +1493,7 @@ class VRController {
                     );
                     leaf.position.set(twist + side * 0.5, y, Math.cos(i * 0.3) * 0.3);
                     leaf.rotation.z = side * 0.5;
-                    leaf.rotation.y = Math.random() * Math.PI;
+                    leaf.rotation.y = _bsRng() * Math.PI;
                     beanGroup.add(leaf);
                 }
             }
@@ -1515,33 +1518,36 @@ class VRController {
         this.scene.fog = new THREE.FogExp2(VRController.VGA[C.DGRAY], 0.08);
 
         // Dense trees everywhere creating a canopy
+        const dfTrRng = this._seededRng('deep_forest_trees');
         for (let layer = 0; layer < 3; layer++) {
             const count = 6 + layer * 3;
             const dist = 3 + layer * 2;
             for (let i = 0; i < count; i++) {
                 const angle = (i / count) * Math.PI * 2 + layer * 0.3;
-                const d = dist + Math.random() * 1.5;
+                const d = dist + dfTrRng() * 1.5;
                 const darkness = layer === 0 ? 'deciduous' : 'pine';
                 this.addTree(
                     Math.cos(angle) * d, Math.sin(angle) * d,
-                    3 + Math.random() * 2, 1.0 + Math.random() * 0.5, darkness
+                    3 + dfTrRng() * 2, 1.0 + dfTrRng() * 0.5, darkness
                 );
             }
         }
 
         // Twisted vines hanging from trees
+        const dfViRng = this._seededRng('deep_forest_vines');
         for (let i = 0; i < 10; i++) {
-            const vx = -4 + Math.random() * 8;
-            const vz = -4 + Math.random() * 8;
+            const vx = -4 + dfViRng() * 8;
+            const vz = -4 + dfViRng() * 8;
             for (let j = 0; j < 6; j++) {
                 this.addSphere(vx + Math.sin(j * 0.8) * 0.15, 3.5 - j * 0.4, vz, 0.03, C.GREEN);
             }
         }
 
         // Glowing mushrooms (emissive)
+        const dfMuRng = this._seededRng('deep_forest_mushrooms');
         for (let i = 0; i < 8; i++) {
             const mx = -3 + i * 0.8;
-            const mz = -2 + Math.random() * 4;
+            const mz = -2 + dfMuRng() * 4;
             // Mushroom cap
             const cap = new THREE.Mesh(
                 new THREE.ConeGeometry(0.12, 0.08, 6),
@@ -1566,14 +1572,15 @@ class VRController {
             this.addSphere(2.3, 0.16, -1.8, 0.03, C.LGREEN);
         }
 
-        // Mysterious fog particles
+        // Mysterious fog particles (seeded)
+        const dfFgRng = this._seededRng('deep_forest_fog');
         for (let i = 0; i < 15; i++) {
             const fogPuff = this.addSphere(
-                -4 + Math.random() * 8, 0.3 + Math.random() * 0.5, -4 + Math.random() * 8,
-                0.15 + Math.random() * 0.2, C.LGRAY
+                -4 + dfFgRng() * 8, 0.3 + dfFgRng() * 0.5, -4 + dfFgRng() * 8,
+                0.15 + dfFgRng() * 0.2, C.LGRAY
             );
             fogPuff.material = this.getEGAMaterial(C.LGRAY, { transparent: true, opacity: 0.2 });
-            this.animatedObjects.push({ type: 'drift', mesh: fogPuff, phase: Math.random() * Math.PI * 2 });
+            this.animatedObjects.push({ type: 'drift', mesh: fogPuff, phase: dfFgRng() * Math.PI * 2 });
         }
     }
 
@@ -1588,11 +1595,12 @@ class VRController {
         sun.position.set(0, 10, 0);
         this.roomGroup.add(sun);
 
-        // Cloud ground (multiple white/light gray spheres making bumpy surface)
+        // Cloud ground (multiple white/light gray spheres — seeded)
+        const crCgRng = this._seededRng('cloud_ground');
         for (let i = 0; i < 40; i++) {
-            const cx = -6 + Math.random() * 12;
-            const cz = -6 + Math.random() * 12;
-            const size = 0.5 + Math.random() * 1.0;
+            const cx = -6 + crCgRng() * 12;
+            const cz = -6 + crCgRng() * 12;
+            const size = 0.5 + crCgRng() * 1.0;
             const cloud = this.addSphere(cx, -0.2, cz, size, i % 3 === 0 ? C.LGRAY : C.WHITE);
             cloud.scale.set(1, 0.4, 1);
         }
@@ -1634,11 +1642,13 @@ class VRController {
         // Door
         this.addMeshToGroup(castleGroup, new THREE.BoxGeometry(0.8, 1.5, 0.1), C.BROWN, 0, 0.75, 1.55);
         // Candy decorations (colored dots)
+        // Candy decorations (colored dots — seeded)
+        const crCaRng = this._seededRng('cloud_candy');
         const candyColors = [C.RED, C.YELLOW, C.LCYAN, C.LGREEN];
         for (let i = 0; i < 15; i++) {
             this.addMeshToGroup(castleGroup,
                 new THREE.SphereGeometry(0.06, 4, 3), candyColors[i % candyColors.length],
-                -1.5 + Math.random() * 3, 0.5 + Math.random() * 2.5, 1.52);
+                -1.5 + crCaRng() * 3, 0.5 + crCaRng() * 2.5, 1.52);
         }
         castleGroup.position.set(0, 0, -8);
         this.roomGroup.add(castleGroup);
@@ -1659,14 +1669,15 @@ class VRController {
             }
         }
 
-        // Floating cloud puffs in the air
+        // Floating cloud puffs in the air (seeded)
+        const crFcRng = this._seededRng('cloud_float');
         for (let i = 0; i < 10; i++) {
             const cloud = this.addSphere(
-                -5 + Math.random() * 10, 3 + Math.random() * 4, -5 + Math.random() * 10,
-                0.3 + Math.random() * 0.5, C.WHITE
+                -5 + crFcRng() * 10, 3 + crFcRng() * 4, -5 + crFcRng() * 10,
+                0.3 + crFcRng() * 0.5, C.WHITE
             );
             cloud.scale.set(1.5, 0.5, 1);
-            this.animatedObjects.push({ type: 'drift', mesh: cloud, phase: Math.random() * 10 });
+            this.animatedObjects.push({ type: 'drift', mesh: cloud, phase: crFcRng() * 10 });
         }
     }
 
@@ -1699,34 +1710,37 @@ class VRController {
         caveCeiling.position.y = 6;
         this.roomGroup.add(caveCeiling);
 
-        // Stalactites
+        // Stalactites (seeded)
+        const dlStRng = this._seededRng('dragon_stalactites');
         for (let i = 0; i < 12; i++) {
-            const sx = -5 + Math.random() * 10;
-            const sz = -5 + Math.random() * 10;
-            const length = 0.5 + Math.random() * 1.5;
-            this.addCone(sx, 6 - length / 2, sz, 0.15 + Math.random() * 0.1, length, C.DGRAY);
+            const sx = -5 + dlStRng() * 10;
+            const sz = -5 + dlStRng() * 10;
+            const length = 0.5 + dlStRng() * 1.5;
+            this.addCone(sx, 6 - length / 2, sz, 0.15 + dlStRng() * 0.1, length, C.DGRAY);
         }
 
-        // TREASURE PILE (lots of VGA gold!)
+        // TREASURE PILE (lots of VGA gold!) — seeded for stable layout
         const goldX = -3, goldZ = -3;
-        // Gold mound (stacked coins — rich VGA gold palette)
+        // Gold mound (stacked coins)
+        const dlGoRng = this._seededRng('dragon_gold');
         for (let i = 0; i < 30; i++) {
-            const gx = goldX + (Math.random() - 0.5) * 3;
-            const gz = goldZ + (Math.random() - 0.5) * 3;
-            const gy = Math.random() * 0.6;
-            const size = 0.06 + Math.random() * 0.08;
+            const gx = goldX + (dlGoRng() - 0.5) * 3;
+            const gz = goldZ + (dlGoRng() - 0.5) * 3;
+            const gy = dlGoRng() * 0.6;
+            const size = 0.06 + dlGoRng() * 0.08;
             this.addCylinder(gx, gy, gz, size, size, 0.03, i % 3 === 0 ? C.GOLD : C.WARM_YELLOW, 8);
         }
-        // Jewels scattered in treasure — VGA gem palette
+        // Jewels scattered in treasure — VGA gem palette (seeded)
+        const dlJeRng = this._seededRng('dragon_jewels');
         const jewelColors = [C.CRIMSON, C.TURQUOISE, C.SPRING, C.ORCHID, C.SKY_BLUE, C.TOMATO];
         for (let i = 0; i < 10; i++) {
-            const jx = goldX + (Math.random() - 0.5) * 2.5;
-            const jz = goldZ + (Math.random() - 0.5) * 2.5;
+            const jx = goldX + (dlJeRng() - 0.5) * 2.5;
+            const jz = goldZ + (dlJeRng() - 0.5) * 2.5;
             const mesh = new THREE.Mesh(
                 new THREE.OctahedronGeometry(0.06, 0),
                 this.getEGAMaterial(jewelColors[i % jewelColors.length], { emissive: true, emissiveIntensity: 0.3 })
             );
-            mesh.position.set(jx, 0.2 + Math.random() * 0.3, jz);
+            mesh.position.set(jx, 0.2 + dlJeRng() * 0.3, jz);
             this.roomGroup.add(mesh);
         }
         // Gold chalices
@@ -2277,6 +2291,20 @@ class VRController {
         }
     }
 
+    /** Deterministic PRNG (Mulberry32) — same seed → same room layout on every rebuild.
+     *  Accepts a string room-id or a numeric seed. */
+    _seededRng(seed) {
+        let s = (typeof seed === 'string'
+            ? [...seed].reduce((a, c) => Math.imul(31, a) + c.charCodeAt(0) | 0, 0)
+            : seed) >>> 0;
+        return function () {
+            s += 0x6D2B79F5; s |= 0;
+            let t = Math.imul(s ^ (s >>> 15), 1 | s);
+            t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
     convertColor(hexColor) {
         return new THREE.Color(hexColor);
     }
@@ -2614,23 +2642,25 @@ class VRController {
         const C = VRController.C;
         const outdoor = ['castle_gate', 'courtyard', 'forest_path', 'forest_clearing'];
         if (!outdoor.includes(this.game.currentRoom)) return;
+        // Outdoor animated clouds (seeded for stable layout)
+        const rcRng = this._seededRng('room_clouds');
         for (let i = 0; i < 8; i++) {
             const group = new THREE.Group();
-            const puffs = 3 + Math.floor(Math.random() * 3);
+            const puffs = 3 + Math.floor(rcRng() * 3);
             for (let j = 0; j < puffs; j++) {
                 const puff = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.5 + Math.random() * 0.7, 7, 5),
+                    new THREE.SphereGeometry(0.5 + rcRng() * 0.7, 7, 5),
                     this.getEGAMaterial(j % 2 === 0 ? C.WHITE : C.LGRAY)
                 );
-                puff.position.set(j * 0.9 - puffs * 0.45, Math.random() * 0.3, 0);
-                puff.scale.y = 0.45 + Math.random() * 0.2;
+                puff.position.set(j * 0.9 - puffs * 0.45, rcRng() * 0.3, 0);
+                puff.scale.y = 0.45 + rcRng() * 0.2;
                 group.add(puff);
             }
             const angle = (i / 8) * Math.PI * 2;
-            const dist  = 14 + Math.random() * 8;
+            const dist  = 14 + rcRng() * 8;
             group.position.set(
                 Math.cos(angle) * dist,
-                8 + Math.random() * 5,
+                8 + rcRng() * 5,
                 Math.sin(angle) * dist - 8
             );
             this.roomGroup.add(group);

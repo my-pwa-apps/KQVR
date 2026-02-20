@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
     <title>King's Quest VR: The Magical Mishap</title>
     <style>
         *, *::before, *::after {
@@ -51,7 +52,7 @@
         canvas {
             display: block;
             image-rendering: pixelated;
-            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -webkit-optimize-contrast; /* Edge 79-84 / Safari fallback */
             image-rendering: crisp-edges;
         }
         #text-area {
@@ -153,6 +154,7 @@
             margin-bottom: 4px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(0, 170, 170, 0.6), 0 0 20px rgba(0, 170, 170, 0.2);
+            -webkit-user-select: none;
             user-select: none;
         }
         /* Scrollbar styling for Sierra aesthetic */
@@ -178,7 +180,7 @@
         <div id="text-area" class="sierra-text"></div>
         <div id="input-area">
             <span id="input-prompt" class="sierra-text">&gt;</span>
-            <input type="text" id="command-input" autocomplete="off" placeholder="Type a command..." />
+            <input type="text" id="command-input" inputmode="text" autocomplete="off" placeholder="Type a command..." />
         </div>
     </div>
     

@@ -17,6 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Start the game
     game.start();
+    installEasterEggs(); // must run after game is initialised
     
     // Command input handling
     commandInput.addEventListener('keydown', (e) => {
@@ -72,9 +73,12 @@ function handleRiddleAnswer(answer) {
     }
 }
 
+let gameWon = false;
 function checkWinCondition() {
+    if (gameWon) return;
     // Check if player has returned pudding to throne room
     if (game.currentRoom === 'throne_room' && game.hasObject('royal_pudding')) {
+        gameWon = true;
         game.displayText("\n========================================");
         game.displayText("You present the Royal Pudding to the King!");
         game.displayText("\nKing: 'MY PUDDING! You've done it, Sir Graham!'");
@@ -200,7 +204,7 @@ function installEasterEggs() {
         originalProcess(input);
     };
 }
-installEasterEggs();
+// installEasterEggs is now called inside DOMContentLoaded after game init
 
 // Window resize handler
 window.addEventListener('resize', () => {

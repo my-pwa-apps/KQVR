@@ -305,57 +305,40 @@ class GameEngine {
         }
     }
 
-    /** AGI-style LFSR dissolve transition (from ScummVM transition_Amiga) */
+    /** AGI-style dissolve transition — coprime step walk covers every pixel exactly once.
+     *  For a 640×400 = 256 000 pixel canvas we use step 65537 (Fermat prime).
+     *  gcd(65537, 256000) = 1, so the walk is a complete permutation. */
     dissolveTransition(newRoom) {
-        // Save current screen
         const oldImage = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-
-        // Draw new room offscreen
         this.drawRoom(newRoom);
         const newImage = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-
-        // Restore old image
         this.ctx.putImageData(oldImage, 0, 0);
 
-        // LFSR dissolve - reveal new pixels pseudo-randomly
-        const w = this.canvas.width;
-        const h = this.canvas.height;
-        const totalPixels = w * h;
-        let lfsrState = 1;
+        const totalPixels = this.canvas.width * this.canvas.height;
+        // Step must be coprime with totalPixels.  65537 works for 640×400;
+        // fall back to a safe odd non-multiple-of-5 for other canvas sizes.
+        const STEP = ((totalPixels % 65537) !== 0) ? 65537 : 98767;
+        const pixelsPerFrame = Math.ceil(totalPixels / 24); // ~24 frames ≈ 400 ms at 60 fps
+        const data = oldImage.data;
+        const src  = newImage.data;
+        let pos = 0;
         let revealed = 0;
-        const pixelsPerFrame = Math.ceil(totalPixels / 20); // ~20 frames
 
         const dissolveStep = () => {
-            const pixels = oldImage.data;
             for (let i = 0; i < pixelsPerFrame && revealed < totalPixels; i++) {
-                // Advance LFSR (15-bit, polynomial 0x3500 from AGI Amiga transition)
-                lfsrState ^= 0x3500;
-                if (lfsrState & 1) {
-                    lfsrState = (lfsrState >> 1) | 0x4000;
-                } else {
-                    lfsrState = lfsrState >> 1;
-                }
-
-                if (lfsrState < totalPixels) {
-                    const idx = lfsrState * 4;
-                    pixels[idx] = newImage.data[idx];
-                    pixels[idx + 1] = newImage.data[idx + 1];
-                    pixels[idx + 2] = newImage.data[idx + 2];
-                    pixels[idx + 3] = newImage.data[idx + 3];
-                    revealed++;
-                }
+                const idx = pos * 4;
+                data[idx]     = src[idx];
+                data[idx + 1] = src[idx + 1];
+                data[idx + 2] = src[idx + 2];
+                data[idx + 3] = src[idx + 3];
+                pos = (pos + STEP) % totalPixels;
+                revealed++;
             }
-
             this.ctx.putImageData(oldImage, 0, 0);
-
-            if (revealed < totalPixels && lfsrState !== 1) {
+            if (revealed < totalPixels) {
                 requestAnimationFrame(dissolveStep);
-            } else {
-                // Ensure final frame is fully drawn
-                this.ctx.putImageData(newImage, 0, 0);
             }
         };
-
         dissolveStep();
     }
     
@@ -548,7 +531,7 @@ class CommandParser {
             if (noun) {
                 this.examine(noun);
             } else {
-                redraw = true;
+                // enterRoom calls drawRoom internally; no separate redraw needed
                 this.game.enterRoom(this.game.currentRoom);
             }
         } else if (['examine', 'x'].includes(verb)) {
@@ -657,8 +640,9 @@ class CommandParser {
             this.game.displayText("Use what?");
             return;
         }
-        
-        const objectId = this.findObject(noun);
+        // Only match items the player carries or can see in the current room
+        const objectId = this.findObject(noun, 'inventory')
+                      || this.findObject(noun, this.game.currentRoom);
         if (objectId) {
             const obj = this.game.objects[objectId];
             if (obj.onUse) {
@@ -667,7 +651,7 @@ class CommandParser {
                 this.game.displayText("You're not sure how to use that here.");
             }
         } else {
-            this.game.displayText("You don't have that.");
+            this.game.displayText("You don't see that here.");
         }
     }
     
