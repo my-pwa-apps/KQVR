@@ -2516,7 +2516,8 @@ class VRController {
                     const nowX = performance.now();
                     if (!this._lastUsePress || nowX - this._lastUsePress > 1200) {
                         this._lastUsePress = nowX;
-                        this._vrButtonAction(source, 'use');
+                        const ctrlX = this.controllers.find(c => c.userData.inputSource === source);
+                        if (ctrlX) this._vrButtonAction(ctrlX, 'use');
                     }
                 }
                 // Y button — EXAMINE aimed interactable
@@ -2524,7 +2525,8 @@ class VRController {
                     const nowY = performance.now();
                     if (!this._lastExaminePress || nowY - this._lastExaminePress > 1200) {
                         this._lastExaminePress = nowY;
-                        this._vrButtonAction(source, 'examine');
+                        const ctrlY = this.controllers.find(c => c.userData.inputSource === source);
+                        if (ctrlY) this._vrButtonAction(ctrlY, 'examine');
                     }
                 }
             }
