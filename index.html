@@ -106,10 +106,36 @@
             color: #555555;
             border-color: #333333;
         }
+        #game-toolbar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 4px 8px;
+            background: #000;
+            border-bottom: 1px solid #00AAAA;
+        }
+        #save-btn {
+            background: #003300;
+            color: #00FF00;
+            border: 1px solid #00AA00;
+            padding: 4px 10px;
+            font-family: 'Courier New', 'Lucida Console', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #save-btn:hover { background: #004400; }
+        #load-btn {
+            background: #001133;
+            color: #5599FF;
+            border: 1px solid #0055AA;
+            padding: 4px 10px;
+            font-family: 'Courier New', 'Lucida Console', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #load-btn:hover { background: #002244; }
         #vr-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            flex: 1;
             padding: 10px 20px;
             background: #5500AA;
             color: #FFF;
@@ -172,7 +198,11 @@
 </head>
 <body>
     <div id="game-container">
-        <button id="vr-button" disabled>Enter VR Mode</button>
+        <div id="game-toolbar">
+            <button id="vr-button" disabled>Enter VR Mode</button>
+            <button id="save-btn" onclick="if(window.game)game.save()" title="Save game (S)">&#x1F4BE; Save</button>
+            <button id="load-btn" onclick="if(window.game)game.load()" title="Load game (L)">&#x1F4C2; Load</button>
+        </div>
         <div id="title-bar">King&#x2019;s Quest VR &mdash; The Magical Mishap</div>
         <div id="canvas-container">
             <canvas id="game-canvas" width="640" height="400"></canvas>

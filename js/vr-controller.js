@@ -724,149 +724,475 @@ class VRController {
         const group = new THREE.Group();
 
         if (type === 'guard') {
-            // Body
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.35, 0.6, 0.25), C.RED, 0, 0.7, 0);
-            // Legs
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.4, 0.12), C.BROWN, -0.08, 0.2, 0);
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.4, 0.12), C.BROWN, 0.08, 0.2, 0);
-            // Head/helmet
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.14, 6, 5), C.LGRAY, 0, 1.15, 0);
-            // Spear
-            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.02, 0.02, 1.5, 4), C.BROWN, 0.25, 1.0, 0);
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.04, 0.15, 4), C.LGRAY, 0.25, 1.82, 0);
+            // Feet / boots
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.14, 0.07, 0.18), C.DARK_BROWN, -0.09, 0.035, 0.02);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.14, 0.07, 0.18), C.DARK_BROWN,  0.09, 0.035, 0.02);
+            // Greaves (plate leg armor)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.38, 0.14), C.SILVER, -0.09, 0.25, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.38, 0.14), C.SILVER,  0.09, 0.25, 0);
+            // Tabard / surcoat (red cloth over armor)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.36, 0.55, 0.22), C.RED, 0, 0.72, 0);
+            // Gold cross on tabard
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.04, 0.22, 0.01), C.GOLD, 0, 0.72, 0.12);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.18, 0.04, 0.01), C.GOLD, 0, 0.76, 0.12);
+            // Breastplate (silver over tabard)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.30, 0.40, 0.05), C.SILVER, 0, 0.78, 0.12);
+            // Belt
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.38, 0.05, 0.23), C.DARK_BROWN, 0, 0.47, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.08, 0.06), C.GOLD, 0, 0.47, 0.12);
+            // Pauldrons (shoulder guards)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.08, 0.22), C.SILVER, -0.24, 0.97, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.08, 0.22), C.SILVER,  0.24, 0.97, 0);
+            // Arms / gauntlets
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.11, 0.38, 0.11), C.SILVER, -0.25, 0.73, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.11, 0.38, 0.11), C.SILVER,  0.25, 0.73, 0);
+            // Shield (kite shape via flat box)
+            const shield = this.addMeshToGroup(group, new THREE.BoxGeometry(0.28, 0.40, 0.04), C.RED, -0.45, 0.73, 0);
+            shield.rotation.y = 0.35;
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.04, 0.32, 0.01), C.YELLOW, -0.45, 0.73, 0.025);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.24, 0.04, 0.01), C.YELLOW, -0.45, 0.73, 0.025);
+            // Helmet (great helm)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.32, 0.30, 0.30), C.SILVER, 0, 1.19, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.32, 0.04, 0.04), C.SILVER, 0, 1.26, 0);
+            // Visor slit
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.24, 0.04, 0.02), C.BLACK, 0, 1.14, 0.16);
+            // Face (skin) visible below visor
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.20, 0.10, 0.02), C.SKIN, 0, 1.06, 0.16);
+            // Eyes
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 4, 3), C.BLACK, -0.05, 1.08, 0.17);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 4, 3), C.BLACK,  0.05, 1.08, 0.17);
+            // Helmet crest ridge
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.05, 0.10, 0.30), C.SILVER, 0, 1.35, 0);
+            // Red plume
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.04, 0.16, 0.04), C.RED, 0, 1.46, 0);
+            // Cheek guards
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.04, 0.18, 0.22), C.SILVER, -0.17, 1.13, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.04, 0.18, 0.22), C.SILVER,  0.17, 1.13, 0);
+            // Halberd pole
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.02, 0.02, 1.8, 5), C.WOOD, 0.38, 1.1, 0);
+            // Halberd blade
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.04, 0.30, 0.02), C.SILVER, 0.38, 2.05, 0);
+            const halberdBlade = this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.20, 4), C.SILVER, 0.38, 2.08, 0);
+            halberdBlade.rotation.z = Math.PI;
+            // Halberd cross-bar
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.18, 0.04, 0.02), C.GOLD, 0.38, 1.96, 0);
+
         } else if (type === 'wizard') {
-            // Robe
-            const robeGeom = new THREE.CylinderGeometry(0.15, 0.3, 0.9, 6);
-            this.addMeshToGroup(group, robeGeom, C.BLUE, 0, 0.55, 0);
-            // Stars on robe (small yellow dots)
-            for (let i = 0; i < 4; i++) {
-                const angle = (i / 4) * Math.PI * 2;
-                this.addMeshToGroup(group, new THREE.SphereGeometry(0.02, 4, 3), C.YELLOW,
-                    Math.cos(angle) * 0.18, 0.5 + i * 0.1, Math.sin(angle) * 0.18);
-            }
-            // Head
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.14, 6, 5), C.BROWN, 0, 1.15, 0);
-            // Beard
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.1, 0.2, 4), C.WHITE, 0, 0.95, 0.08);
-            // Hat
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.18, 0.5, 6), C.MAGENTA, 0, 1.55, 0);
-            // Hat brim
-            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.22, 0.22, 0.04, 8), C.MAGENTA, 0, 1.28, 0);
-            // Staff
-            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.02, 0.02, 1.4, 4), C.BROWN, -0.3, 0.8, 0);
-            // Staff crystal
-            const staffCrystal = this.addMeshToGroup(group, new THREE.OctahedronGeometry(0.08, 0), C.LCYAN, -0.3, 1.55, 0);
-            this.animatedObjects.push({ type: 'glow', mesh: staffCrystal, phase: 0 });
-        } else if (type === 'king') {
-            // Royal robe
-            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.18, 0.35, 0.8, 6), C.MAGENTA, 0, 0.5, 0);
-            // Ermine trim (white dots)
+            // Shoes (pointy wizard shoes)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.06, 0.20), C.DARK_BROWN, -0.08, 0.03, 0.04);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.06, 0.20), C.DARK_BROWN,  0.08, 0.03, 0.04);
+            // Robe (wide bell shape — INDIGO with MAGENTA trim)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.14, 0.36, 0.95, 7), C.INDIGO, 0, 0.58, 0);
+            // Robe trim at hem
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.36, 0.37, 0.05, 7), C.MAGENTA, 0, 0.085, 0);
+            // Collar
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.15, 0.14, 0.06, 7), C.MAGENTA, 0, 1.09, 0);
+            // Stars on robe (emissive gold spikes — OctahedronGeometry looks star-like)
             for (let i = 0; i < 6; i++) {
                 const angle = (i / 6) * Math.PI * 2;
-                this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 4, 3), C.WHITE,
-                    Math.cos(angle) * 0.32, 0.15, Math.sin(angle) * 0.32);
+                const star = this.addMeshToGroup(group,
+                    new THREE.OctahedronGeometry(0.032, 0), C.YELLOW,
+                    Math.cos(angle) * 0.21, 0.45 + (i % 3) * 0.22, Math.sin(angle) * 0.21);
+                star.material = this.getEGAMaterial(C.YELLOW, { emissive: true, emissiveIntensity: 0.6 });
             }
-            // Head
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.14, 6, 5), C.BROWN, 0, 1.1, 0);
-            // Beard
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.1, 0.15, 4), C.WHITE, 0, 0.92, 0.08);
-            // Crown
-            const crownGeom = new THREE.CylinderGeometry(0.14, 0.16, 0.1, 6);
-            this.addMeshToGroup(group, crownGeom, C.YELLOW, 0, 1.32, 0);
-            // Crown points
+            // Crescent moon (flat torus)
+            const moonGeom = new THREE.TorusGeometry(0.06, 0.018, 4, 8, Math.PI * 1.3);
+            const moon = new THREE.Mesh(moonGeom, this.getEGAMaterial(C.YELLOW, { emissive: true, emissiveIntensity: 0.7 }));
+            moon.position.set(0.15, 0.72, 0.22);
+            moon.rotation.z = -0.3;
+            group.add(moon);
+            // Wide flaring sleeves
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.07, 0.14, 0.38, 6), C.INDIGO, -0.30, 0.72, 0);
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.07, 0.14, 0.38, 6), C.INDIGO,  0.30, 0.72, 0);
+            // Hands (wrinkled old)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.05, 5, 4), C.SKIN, -0.30, 0.52, 0);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.05, 5, 4), C.SKIN,  0.30, 0.52, 0);
+            // Neck
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.05, 0.05, 0.08, 6), C.SKIN, 0, 1.12, 0);
+            // Head (old face — slightly elongated)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.145, 7, 6), C.SKIN, 0, 1.26, 0);
+            // Eyebrows (bushy white)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.02, 0.02), C.WHITE, -0.055, 1.33, 0.14);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.02, 0.02), C.WHITE,  0.055, 1.33, 0.14);
+            // Eyes (startled wide-open)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 5, 4), C.WHITE, -0.055, 1.28, 0.14);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 5, 4), C.WHITE,  0.055, 1.28, 0.14);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.016, 4, 3), C.BLACK, -0.055, 1.28, 0.155);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.016, 4, 3), C.BLACK,  0.055, 1.28, 0.155);
+            // Nose
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.028, 5, 4), C.PERU, 0, 1.235, 0.145);
+            // Long flowy beard
+            const beardGeom = new THREE.ConeGeometry(0.12, 0.40, 5);
+            this.addMeshToGroup(group, beardGeom, C.WHITE, 0, 1.008, 0.06);
+            // Moustache
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.22, 0.04, 0.04), C.WHITE, 0, 1.20, 0.13);
+            // Wizard hat (tall, slightly tilted)
+            const hat = new THREE.Group();
+            // Hat brim
+            this.addMeshToGroup(hat, new THREE.CylinderGeometry(0.25, 0.25, 0.05, 8), C.MAGENTA, 0, 1.42, 0);
+            // Hat band (VIOLET)
+            this.addMeshToGroup(hat, new THREE.CylinderGeometry(0.17, 0.17, 0.07, 8), C.VIOLET, 0, 1.50, 0);
+            // Hat cone (tall!)
+            this.addMeshToGroup(hat, new THREE.ConeGeometry(0.18, 0.65, 7), C.MAGENTA, 0, 1.80, 0);
+            // Hat star decoration (emissive)
+            const hatStar = this.addMeshToGroup(hat, new THREE.OctahedronGeometry(0.04, 0), C.YELLOW, 0, 1.70, 0.12);
+            hatStar.material = this.getEGAMaterial(C.YELLOW, { emissive: true, emissiveIntensity: 0.9 });
+            hat.rotation.z = -0.08; // slightly askew (flustered wizard)
+            group.add(hat);
+            // Staff
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.02, 0.025, 1.6, 5), C.WOOD, -0.38, 0.92, 0);
+            // Staff cross-guard
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.20, 0.04, 0.04), C.GOLD, -0.38, 1.56, 0);
+            // Staff crystal orb
+            const staffCrystal = this.addMeshToGroup(group, new THREE.SphereGeometry(0.09, 7, 6), C.LCYAN, -0.38, 1.70, 0);
+            staffCrystal.material = this.getEGAMaterial(C.LCYAN, { emissive: true, emissiveIntensity: 0.6, transparent: true, opacity: 0.85 });
+            this.animatedObjects.push({ type: 'glow', mesh: staffCrystal, phase: 0 });
+            // Inner glow sphere
+            const innerGlow = this.addMeshToGroup(group, new THREE.SphereGeometry(0.06, 6, 5), C.CYAN, -0.38, 1.70, 0);
+            innerGlow.material = this.getEGAMaterial(C.CYAN, { emissive: true, emissiveIntensity: 1.0 });
+            this.animatedObjects.push({ type: 'glow', mesh: innerGlow, phase: Math.PI });
+
+        } else if (type === 'king') {
+            // Feet
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.14, 0.06, 0.18), C.DARK_BROWN, -0.09, 0.03, 0.02);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.14, 0.06, 0.18), C.DARK_BROWN,  0.09, 0.03, 0.02);
+            // Royal robe (seated on throne — wider at base)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.19, 0.40, 0.85, 7), C.MAGENTA, 0, 0.53, 0);
+            // Robe shading (darker purple side)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.19, 0.41, 0.87, 7), C.PURPLE, 0, 0.53, 0);
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.20, 0.38, 0.82, 7), C.MAGENTA, 0, 0.51, 0);
+            // Ermine trim (white dots all round hem)
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                this.addMeshToGroup(group, new THREE.SphereGeometry(0.035, 4, 3), C.WHITE,
+                    Math.cos(angle) * 0.36, 0.12, Math.sin(angle) * 0.36);
+                this.addMeshToGroup(group, new THREE.SphereGeometry(0.015, 4, 3), C.BLACK,
+                    Math.cos(angle) * 0.36, 0.14, Math.sin(angle) * 0.36);
+            }
+            // Chest brooch / royal pendant
+            const brooch = this.addMeshToGroup(group, new THREE.SphereGeometry(0.05, 6, 5), C.CYAN, 0, 0.88, 0.20);
+            brooch.material = this.getEGAMaterial(C.CYAN, { emissive: true, emissiveIntensity: 0.4 });
+            // Belt
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.20, 0.20, 0.05, 7), C.GOLD, 0, 0.48, 0);
+            // Collar (ermine-trimmed)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.17, 0.17, 0.06, 7), C.WHITE, 0, 1.05, 0);
+            // Arms on armrests
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.10, 0.14), C.MAGENTA, -0.28, 0.92, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.10, 0.14), C.MAGENTA,  0.28, 0.92, 0);
+            // Hands (drumming impatiently)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 5, 4), C.SKIN, -0.28, 0.85, 0.08);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 5, 4), C.SKIN,  0.28, 0.85, 0.08);
+            // Neck
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.06, 0.06, 0.09, 6), C.SKIN, 0, 1.12, 0);
+            // Head (round, regal)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.155, 7, 6), C.SKIN, 0, 1.28, 0);
+            // Cheeks (slightly flushed)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 4, 3), C.PINK, -0.10, 1.25, 0.13);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 4, 3), C.PINK,  0.10, 1.25, 0.13);
+            // Grumpy eyebrows (angled inward)
+            const lBrow = this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.025, 0.02), C.DARK_BROWN, -0.058, 1.365, 0.155);
+            lBrow.rotation.z =  0.4;
+            const rBrow = this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.025, 0.02), C.DARK_BROWN,  0.058, 1.365, 0.155);
+            rBrow.rotation.z = -0.4;
+            // Eyes (squinting, grumpy)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.027, 5, 4), C.WHITE, -0.058, 1.330, 0.155);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.027, 5, 4), C.WHITE,  0.058, 1.330, 0.155);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.018, 4, 3), C.BLACK, -0.058, 1.328, 0.168);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.018, 4, 3), C.BLACK,  0.058, 1.328, 0.168);
+            // Prominent royal nose
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.035, 5, 4), C.PERU, 0, 1.280, 0.160);
+            // Beard (two-pointed royal beard)
+            const lBeard = this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.22, 4), C.WHITE, -0.05, 1.05, 0.08);
+            lBeard.rotation.x = 0.15;
+            const rBeard = this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.22, 4), C.WHITE,  0.05, 1.05, 0.08);
+            rBeard.rotation.x = 0.15;
+            // Moustache
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.22, 0.04, 0.04), C.WHITE, 0, 1.215, 0.145);
+            // Crown (5 points, gemstones)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.165, 0.175, 0.10, 7), C.GOLD, 0, 1.50, 0);
             for (let i = 0; i < 5; i++) {
                 const angle = (i / 5) * Math.PI * 2;
-                this.addMeshToGroup(group, new THREE.ConeGeometry(0.025, 0.08, 4), C.YELLOW,
-                    Math.cos(angle) * 0.12, 1.42, Math.sin(angle) * 0.12);
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.032, 0.095, 5), C.GOLD,
+                    Math.cos(angle) * 0.138, 1.60, Math.sin(angle) * 0.138);
             }
-            // Crown jewels
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 4, 3), C.RED, 0, 1.35, 0.14);
+            // Crown jewels (alternating rubies/sapphires)
+            const crownGems = [C.RED, C.LBLUE, C.LGREEN, C.RED, C.CYAN];
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2;
+                const gem = this.addMeshToGroup(group, new THREE.OctahedronGeometry(0.028, 0), crownGems[i],
+                    Math.cos(angle) * 0.155, 1.49, Math.sin(angle) * 0.155);
+                gem.material = this.getEGAMaterial(crownGems[i], { emissive: true, emissiveIntensity: 0.5 });
+            }
             // Scepter
-            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.015, 0.015, 0.7, 4), C.YELLOW, 0.25, 0.7, 0.1);
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 6, 4), C.RED, 0.25, 1.08, 0.1);
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.020, 0.020, 0.85, 5), C.GOLD, 0.35, 0.75, 0.12);
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.040, 0.040, 0.05, 6), C.GOLD, 0.35, 1.18, 0.12);
+            const scepterOrb = this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 6, 5), C.RED, 0.35, 1.24, 0.12);
+            scepterOrb.material = this.getEGAMaterial(C.RED, { emissive: true, emissiveIntensity: 0.35 });
+
         } else if (type === 'gnome') {
-            // Body (red outfit)
-            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.12, 0.18, 0.5, 6), C.RED, 0, 0.35, 0);
-            // Legs
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.2, 0.08), C.BLUE, -0.05, 0.1, 0);
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.2, 0.08), C.BLUE, 0.05, 0.1, 0);
-            // Boots
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.1, 0.05, 0.12), C.BROWN, -0.05, 0.025, 0.02);
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.1, 0.05, 0.12), C.BROWN, 0.05, 0.025, 0.02);
-            // Head
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.1, 6, 5), C.BROWN, 0, 0.75, 0);
-            // Long beard
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.08, 0.25, 4), C.WHITE, 0, 0.55, 0.06);
-            // Pointy hat
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.12, 0.3, 6), C.RED, 0, 1.0, 0);
-            // Eyes (grumpy)
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.015, 4, 3), C.BLACK, -0.04, 0.77, 0.08);
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.015, 4, 3), C.BLACK, 0.04, 0.77, 0.08);
+            // Curly-toe boots
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.06, 0.18), C.DARK_BROWN, -0.07, 0.03, 0.01);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.06, 0.18), C.DARK_BROWN,  0.07, 0.03, 0.01);
+            // Boot toe curl
+            const ltoe = this.addMeshToGroup(group, new THREE.SphereGeometry(0.045, 5, 4), C.DARK_BROWN, -0.085, 0.055, 0.08);
+            const rtoe = this.addMeshToGroup(group, new THREE.SphereGeometry(0.045, 5, 4), C.DARK_BROWN,  0.085, 0.055, 0.08);
+            // Short stocky legs
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.10, 0.25, 0.10), C.BLUE, -0.07, 0.16, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.10, 0.25, 0.10), C.BLUE,  0.07, 0.16, 0);
+            // Tunic body (stocky gnome — wider than tall)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.16, 0.22, 0.52, 7), C.RED, 0, 0.49, 0);
+            // Tunic trim (GOLD collar and hem)
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.17, 0.18, 0.04, 7), C.GOLD, 0, 0.74, 0);
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.22, 0.23, 0.04, 7), C.GOLD, 0, 0.25, 0);
+            // Buttons
+            for (let i = 0; i < 3; i++) {
+                this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 4, 3), C.GOLD, 0, 0.66 - i * 0.15, 0.22);
+            }
+            // Belt
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.18, 0.18, 0.04, 7), C.DARK_BROWN, 0, 0.32, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.06, 0.07, 0.05), C.GOLD, 0, 0.32, 0.22);
+            // Folded arms (grumpy posture — arms across chest)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.28, 0.08, 0.10), C.RED, 0, 0.60, 0.17);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.18, 0.10), C.RED, -0.20, 0.60, 0.06);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.18, 0.10), C.RED,  0.20, 0.60, 0.06);
+            // Fists
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 5, 4), C.SKIN, -0.25, 0.57, 0.12);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 5, 4), C.SKIN,  0.25, 0.57, 0.12);
+            // Neck
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.055, 0.055, 0.07, 6), C.SKIN, 0, 0.80, 0);
+            // Head (big round gnome head)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.155, 7, 6), C.SKIN, 0, 0.95, 0);
+            // Rosy cheeks
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.044, 4, 3), C.PINK, -0.10, 0.93, 0.12);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.044, 4, 3), C.PINK,  0.10, 0.93, 0.12);
+            // Pointy gnome ears
+            this.addMeshToGroup(group, new THREE.ConeGeometry(0.035, 0.08, 5), C.SKIN, -0.16, 0.97, 0);
+            this.addMeshToGroup(group, new THREE.ConeGeometry(0.035, 0.08, 5), C.SKIN,  0.16, 0.97, 0);
+            // Grumpy furrowed eyebrows
+            const lBrow = this.addMeshToGroup(group, new THREE.BoxGeometry(0.085, 0.022, 0.02), C.DARK_BROWN, -0.058, 1.010, 0.155);
+            lBrow.rotation.z =  0.5;
+            const rBrow = this.addMeshToGroup(group, new THREE.BoxGeometry(0.085, 0.022, 0.02), C.DARK_BROWN,  0.058, 1.010, 0.155);
+            rBrow.rotation.z = -0.5;
+            // Eyes (small, squinting)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.028, 5, 4), C.WHITE, -0.058, 0.975, 0.152);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.028, 5, 4), C.WHITE,  0.058, 0.975, 0.152);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.018, 4, 3), C.BLACK, -0.058, 0.973, 0.165);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.018, 4, 3), C.BLACK,  0.058, 0.973, 0.165);
+            // Big bulbous gnome nose
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.048, 6, 5), C.PERU, 0, 0.940, 0.158);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.030, 5, 4), C.PERU, -0.032, 0.936, 0.164);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.030, 5, 4), C.PERU,  0.032, 0.936, 0.164);
+            // Grumpy frown
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.10, 0.022, 0.02), C.DARK_BROWN, 0, 0.898, 0.155);
+            // Long flowing beard (tapers down)
+            this.addMeshToGroup(group, new THREE.ConeGeometry(0.14, 0.46, 6), C.WHITE, 0, 0.62, 0.06);
+            this.addMeshToGroup(group, new THREE.ConeGeometry(0.12, 0.38, 5), C.WHITE, 0.02, 0.62, 0.07);
+            // Moustache bushy
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.22, 0.05, 0.05), C.WHITE, 0, 0.895, 0.14);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 5, 4), C.WHITE, -0.10, 0.888, 0.12);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.055, 5, 4), C.WHITE,  0.10, 0.888, 0.12);
+            // Hat (tall RED pointy gnome hat, droops to one side)
+            const hatGroup = new THREE.Group();
+            // Hat brim
+            this.addMeshToGroup(hatGroup, new THREE.CylinderGeometry(0.24, 0.24, 0.06, 8), C.RED, 0, 1.15, 0);
+            // Hat band with gold medallion
+            this.addMeshToGroup(hatGroup, new THREE.CylinderGeometry(0.175, 0.175, 0.07, 8), C.DARK_BROWN, 0, 1.22, 0);
+            const hatMedal = this.addMeshToGroup(hatGroup, new THREE.SphereGeometry(0.04, 5, 4), C.GOLD, 0, 1.22, 0.18);
+            hatMedal.material = this.getEGAMaterial(C.GOLD, { emissive: true, emissiveIntensity: 0.5 });
+            // Hat cone (tall!)
+            this.addMeshToGroup(hatGroup, new THREE.ConeGeometry(0.18, 0.58, 7), C.RED, 0, 1.53, 0);
+            // Drooping tip
+            const hatTip = this.addMeshToGroup(hatGroup, new THREE.SphereGeometry(0.04, 5, 4), C.WHITE, 0.08, 1.80, 0);
+            hatGroup.rotation.z = 0.18; // hat flops to side
+            group.add(hatGroup);
+
         } else if (type === 'servant') {
-            // Concerned castle servant — simple tunic, head, arms
-            // Randomize clothing color from a few VGA options
+            // Concerned castle servant — Sierra SCI style
             const tunicColors = [C.BLUE, C.BROWN, C.RED, C.GREEN, C.DGRAY];
             const tunicColor = tunicColors[Math.floor(Math.abs(x * 7 + z * 13)) % tunicColors.length];
-            // Body / tunic
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.3, 0.5, 0.2), tunicColor, 0, 0.65, 0);
-            // Apron (lighter front panel)
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.22, 0.4, 0.02), C.PARCHMENT, 0, 0.65, 0.11);
+            const hairColors  = [C.BROWN, C.DARK_BROWN, C.YELLOW, C.DGRAY, C.BLACK];
+            const hairColor   = hairColors[Math.floor(Math.abs(x * 5 + z * 11)) % hairColors.length];
+            // Boots
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.06, 0.16), C.DARK_BROWN, -0.08, 0.03, 0.02);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.06, 0.16), C.DARK_BROWN,  0.08, 0.03, 0.02);
             // Legs
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.1, 0.35, 0.1), C.BROWN, -0.07, 0.18, 0);
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.1, 0.35, 0.1), C.BROWN, 0.07, 0.18, 0);
-            // Shoes
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.11, 0.04, 0.14), C.DARK_BROWN, -0.07, 0.02, 0.02);
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.11, 0.04, 0.14), C.DARK_BROWN, 0.07, 0.02, 0.02);
-            // Head
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.12, 6, 5), C.PEACH, 0, 1.05, 0);
-            // Hair (cap / top of head)
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.1, 6, 3, 0, Math.PI * 2, 0, Math.PI / 2), C.BROWN, 0, 1.1, 0);
-            // Arms (at sides, slightly out — carrying gesture)
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.35, 0.08), tunicColor, -0.22, 0.7, 0);
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.08, 0.35, 0.08), tunicColor, 0.22, 0.7, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.11, 0.38, 0.11), C.BROWN, -0.08, 0.24, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.11, 0.38, 0.11), C.BROWN,  0.08, 0.24, 0);
+            // Body / tunic
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.34, 0.52, 0.22), tunicColor, 0, 0.70, 0);
+            // Apron (lighter front panel)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.26, 0.42, 0.02), C.PARCHMENT, 0, 0.70, 0.12);
+            // Apron bib (top section)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.18, 0.16, 0.02), C.WHITE, 0, 0.92, 0.115);
+            // Arms (reaching out anxiously)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.09, 0.38, 0.09), tunicColor, -0.24, 0.72, 0);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.09, 0.38, 0.09), tunicColor,  0.24, 0.72, 0);
             // Hands
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 4, 3), C.PEACH, -0.22, 0.5, 0);
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 4, 3), C.PEACH, 0.22, 0.5, 0);
-        } else if (type === 'dragon') {
-            // Large sleeping dragon body (curled)
-            const bodyGeom = new THREE.SphereGeometry(0.8, 8, 6);
-            bodyGeom.scale(1.5, 0.6, 1);
-            this.addMeshToGroup(group, bodyGeom, C.GREEN, 0, 0.5, 0);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.045, 5, 4), C.PEACH, -0.24, 0.51, 0);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.045, 5, 4), C.PEACH,  0.24, 0.51, 0);
+            // Neck
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.048, 0.048, 0.08, 6), C.PEACH, 0, 1.02, 0);
             // Head
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.35, 6, 5), C.GREEN, -1.0, 0.4, 0);
-            // Snout
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.4, 0.2, 0.25), C.GREEN, -1.35, 0.35, 0);
-            // Nostrils
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 4, 3), C.BLACK, -1.5, 0.38, 0.08);
-            this.addMeshToGroup(group, new THREE.SphereGeometry(0.04, 4, 3), C.BLACK, -1.5, 0.38, -0.08);
-            // Eye (closed = line, represented as thin box)
-            this.addMeshToGroup(group, new THREE.BoxGeometry(0.12, 0.02, 0.02), C.BLACK, -0.85, 0.55, 0.2);
-            // Horn
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.25, 4), C.LGRAY, -0.75, 0.8, 0);
-            // Wing (folded)
-            const wingGeom = new THREE.PlaneGeometry(1.0, 0.6);
-            const wing = new THREE.Mesh(wingGeom, this.getEGAMaterial(C.DGRAY, { side: THREE.DoubleSide }));
-            wing.position.set(0.2, 0.9, 0);
-            wing.rotation.z = -0.3;
-            wing.rotation.x = 0.2;
-            group.add(wing);
-            // Tail (curling away)
-            for (let i = 0; i < 6; i++) {
-                const angle = i * 0.5;
-                const tx = 0.8 + Math.cos(angle) * (0.4 + i * 0.15);
-                const tz = Math.sin(angle) * 0.6;
-                const size = 0.2 - i * 0.02;
-                this.addMeshToGroup(group, new THREE.SphereGeometry(size, 5, 4), C.GREEN, tx, 0.25, tz);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.135, 7, 6), C.PEACH, 0, 1.15, 0);
+            // Hair cap (top hemisphere = hair/bonnet)
+            const hairHemi = new THREE.Mesh(
+                new THREE.SphereGeometry(0.135, 7, 4, 0, Math.PI * 2, 0, Math.PI / 2),
+                this.getEGAMaterial(hairColor)
+            );
+            hairHemi.position.set(0, 1.205, 0);
+            group.add(hairHemi);
+            // Eyes
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.022, 4, 3), C.BLACK, -0.05, 1.155, 0.135);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.022, 4, 3), C.BLACK,  0.05, 1.155, 0.135);
+            // Eye whites
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.030, 4, 3), C.WHITE, -0.05, 1.157, 0.130);
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.030, 4, 3), C.WHITE,  0.05, 1.157, 0.130);
+            // Worried eyebrows (slightly raised)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.07, 0.018, 0.02), C.DARK_BROWN, -0.05, 1.185, 0.135);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.07, 0.018, 0.02), C.DARK_BROWN,  0.05, 1.185, 0.135);
+            // Open worried mouth (small oval)
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.025, 4, 3), C.BLACK, 0, 1.105, 0.135);
+            // Nose
+            this.addMeshToGroup(group, new THREE.SphereGeometry(0.020, 4, 3), C.PERU, 0, 1.135, 0.145);
+
+        } else if (type === 'dragon') {
+            // === DRAGON (large sleeping — Sierra SCI 3D style) ===
+            // Main body (flattened large sphere)
+            const bodyGeom = new THREE.SphereGeometry(0.85, 9, 7);
+            bodyGeom.scale(1.6, 0.65, 1.1);
+            this.addMeshToGroup(group, bodyGeom, C.SEA_GREEN, 0, 0.52, 0);
+            // Underbelly (lighter color, flat plane)
+            const bellyGeom = new THREE.SphereGeometry(0.6, 7, 5);
+            bellyGeom.scale(1.2, 0.3, 0.9);
+            this.addMeshToGroup(group, bellyGeom, C.LIME, 0, 0.22, 0.3);
+            // Back spines (row of cones)
+            for (let i = 0; i < 7; i++) {
+                const sx = -0.8 + i * 0.28;
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.04, 0.18, 4), C.DGRAY, sx, 0.92, 0);
             }
-            // Tail spike
-            this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.15, 4), C.DGRAY, 1.8, 0.3, 0.4);
-            // Smoke puffs from nose (snoring)
+            // === WINGS ===
+            // Wing arm bones
+            const lwing = new THREE.Group();
+            this.addMeshToGroup(lwing, new THREE.CylinderGeometry(0.035, 0.035, 0.8, 4), C.DARK_BROWN, 0, 0, 0);
+            lwing.rotation.z = -1.1; lwing.rotation.x = 0.3;
+            lwing.position.set(-0.1, 0.9, 0); group.add(lwing);
+            const rwing = new THREE.Group();
+            this.addMeshToGroup(rwing, new THREE.CylinderGeometry(0.035, 0.035, 0.8, 4), C.DARK_BROWN, 0, 0, 0);
+            rwing.rotation.z = 1.1; rwing.rotation.x = 0.3;
+            rwing.position.set(-0.1, 0.9, 0); group.add(rwing);
+            // Wing membranes (large double-sided planes)
+            const wingMat = this.getEGAMaterial(C.FOREST_GREEN, { side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+            const lWingMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.9), wingMat);
+            lWingMesh.position.set(-0.95, 1.0, -0.2);
+            lWingMesh.rotation.z = -0.55; lWingMesh.rotation.y = 0.2; lWingMesh.rotation.x = 0.25;
+            group.add(lWingMesh);
+            const rWingMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.9), wingMat.clone());
+            rWingMesh.position.set(-0.95, 1.0,  0.2);
+            rWingMesh.rotation.z = -0.55; rWingMesh.rotation.y = -0.2; rWingMesh.rotation.x = -0.25;
+            group.add(rWingMesh);
+            // Wing finger bones (4 per wing)
             for (let i = 0; i < 4; i++) {
+                const angle = -0.9 + i * 0.45;
+                const boneL = this.addMeshToGroup(group, new THREE.CylinderGeometry(0.015, 0.01, 0.75, 3), C.DGRAY,
+                    -0.9 + Math.cos(angle) * 0.4, 1.05 + Math.sin(angle) * 0.4, -0.1 - i * 0.09);
+                boneL.rotation.z = angle + Math.PI / 2;
+                const boneR = this.addMeshToGroup(group, new THREE.CylinderGeometry(0.015, 0.01, 0.75, 3), C.DGRAY,
+                    -0.9 + Math.cos(angle) * 0.4, 1.05 + Math.sin(angle) * 0.4,  0.1 + i * 0.09);
+                boneR.rotation.z = angle + Math.PI / 2;
+            }
+            // === NECK ===
+            this.addMeshToGroup(group, new THREE.CylinderGeometry(0.22, 0.30, 0.65, 6), C.SEA_GREEN, -1.05, 0.55, 0);
+            {
+                const neck = group.children[group.children.length - 1];
+                neck.rotation.z = -0.45;
+            }
+            // Neck spines
+            for (let i = 0; i < 3; i++) {
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.035, 0.13, 4), C.DGRAY, -1.0 - i * 0.2, 0.88 - i * 0.08, 0);
+            }
+            // === HEAD (large, reptilian) ===
+            const headGeom = new THREE.SphereGeometry(0.42, 8, 7);
+            headGeom.scale(1.4, 0.85, 1.0);
+            this.addMeshToGroup(group, headGeom, C.SEA_GREEN, -1.55, 0.50, 0);
+            // Head top (slightly different shade)
+            const headTopGeom = new THREE.SphereGeometry(0.36, 7, 5);
+            headTopGeom.scale(1.3, 0.6, 0.9);
+            this.addMeshToGroup(group, headTopGeom, C.GREEN, -1.55, 0.58, 0);
+            // Brow ridge
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.50, 0.08, 0.50), C.GREEN, -1.55, 0.78, 0);
+            // Head crest horns (2 horns)
+            const lHorn = this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.32, 5), C.SILVER, -1.45, 0.98, -0.12);
+            lHorn.rotation.z = -0.30; lHorn.rotation.x = -0.2;
+            const rHorn = this.addMeshToGroup(group, new THREE.ConeGeometry(0.06, 0.32, 5), C.SILVER, -1.45, 0.98,  0.12);
+            rHorn.rotation.z = -0.30; rHorn.rotation.x =  0.2;
+            // Ear frills
+            const earFrillL = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.16),
+                this.getEGAMaterial(C.DGRAY, { side: THREE.DoubleSide }));
+            earFrillL.position.set(-1.35, 0.72, -0.42); earFrillL.rotation.x = 0.4; earFrillL.rotation.z = -0.2;
+            group.add(earFrillL);
+            const earFrillR = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.16),
+                this.getEGAMaterial(C.DGRAY, { side: THREE.DoubleSide }));
+            earFrillR.position.set(-1.35, 0.72,  0.42); earFrillR.rotation.x = -0.4; earFrillR.rotation.z = -0.2;
+            group.add(earFrillR);
+            // Snout (extended, tapered)
+            const snoutGeom = new THREE.BoxGeometry(0.55, 0.25, 0.35);
+            this.addMeshToGroup(group, snoutGeom, C.SEA_GREEN, -2.02, 0.42, 0);
+            // Lower jaw (slightly open — snoring)
+            const jawGeom = new THREE.BoxGeometry(0.52, 0.15, 0.32);
+            this.addMeshToGroup(group, jawGeom, C.SEA_GREEN, -2.00, 0.26, 0);
+            // Teeth (upper row)
+            for (let i = 0; i < 4; i++) {
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.030, 0.10, 4), C.WHITE,
+                    -1.84 - i * 0.08, 0.35, -0.10 + i * 0.065);
+            }
+            // Teeth (lower row)
+            for (let i = 0; i < 3; i++) {
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.025, 0.08, 4), C.WHITE,
+                    -1.86 - i * 0.08, 0.24, -0.07 + i * 0.07);
+            }
+            // Nostrils (large flared)
+            const lNos = this.addMeshToGroup(group, new THREE.CylinderGeometry(0.045, 0.055, 0.04, 6), C.BLACK, -2.24, 0.46, -0.08);
+            const rNos = this.addMeshToGroup(group, new THREE.CylinderGeometry(0.045, 0.055, 0.04, 6), C.BLACK, -2.24, 0.46,  0.08);
+            // Closed sleeping eye (represented as thin horizontal slit)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.22, 0.03, 0.02), C.BLACK, -1.45, 0.65, 0.3);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.18, 0.03, 0.02), C.BLACK, -1.45, 0.65, -0.3);
+            // Eyelid (shut, slight glow = sleeping eye)
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.20, 0.04, 0.02), C.SEA_GREEN, -1.45, 0.668, 0.3);
+            this.addMeshToGroup(group, new THREE.BoxGeometry(0.16, 0.04, 0.02), C.SEA_GREEN, -1.45, 0.668, -0.3);
+            // === TAIL ===
+            for (let i = 0; i < 8; i++) {
+                const angle = i * 0.55;
+                const tx = 0.85 + Math.cos(angle) * (0.55 + i * 0.18);
+                const tz = Math.sin(angle) * 0.75;
+                const size = 0.24 - i * 0.022;
+                this.addMeshToGroup(group, new THREE.SphereGeometry(Math.max(size, 0.06), 6, 5), C.SEA_GREEN, tx, 0.30, tz);
+                // Tail spines
+                if (i < 6) {
+                    this.addMeshToGroup(group, new THREE.ConeGeometry(0.035, 0.15, 4), C.DGRAY,
+                        tx, 0.46 - i * 0.025, tz + 0.03);
+                }
+            }
+            // Tail arrowhead tip
+            this.addMeshToGroup(group, new THREE.ConeGeometry(0.10, 0.28, 4), C.DGRAY, 1.95, 0.30, 0.5);
+            // === CLAWS ===
+            for (let c = 0; c < 3; c++) {
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.025, 0.12, 3), C.DGRAY, -0.5 + c * 0.25, 0.04, 0.55);
+                this.addMeshToGroup(group, new THREE.ConeGeometry(0.025, 0.12, 3), C.DGRAY, -0.5 + c * 0.25, 0.04, -0.55);
+            }
+            // === SMOKE PUFFS (snoring, animated) ===
+            for (let i = 0; i < 5; i++) {
                 const puff = this.addMeshToGroup(group,
-                    new THREE.SphereGeometry(0.06 + i * 0.03, 5, 4), C.LGRAY,
-                    -1.6 - i * 0.15, 0.4 + i * 0.05, 0);
-                puff.material = this.getEGAMaterial(C.LGRAY, { transparent: true, opacity: 0.5 - i * 0.1 });
-                this.animatedObjects.push({ type: 'float', mesh: puff, baseY: puff.position.y, phase: i * 0.5 });
+                    new THREE.SphereGeometry(0.07 + i * 0.04, 6, 5), C.LGRAY,
+                    -2.35 - i * 0.20, 0.46 + i * 0.06, 0);
+                puff.material = this.getEGAMaterial(C.LGRAY, { transparent: true, opacity: 0.55 - i * 0.08 });
+                this.animatedObjects.push({ type: 'float', mesh: puff, baseY: puff.position.y, phase: i * 0.6 });
+            }
+            // Ember sparks from nostrils (tiny emissive spheres)
+            for (let i = 0; i < 3; i++) {
+                const spark = this.addMeshToGroup(group, new THREE.SphereGeometry(0.018, 3, 3), C.ORANGE,
+                    -2.28 - i * 0.06, 0.52 + i * 0.04, (i % 2 === 0 ? 0.06 : -0.06));
+                spark.material = this.getEGAMaterial(C.FIRE_ORANGE, { emissive: true, emissiveIntensity: 1.0, transparent: true, opacity: 0.7 });
+                this.animatedObjects.push({ type: 'float', mesh: spark, baseY: spark.position.y, phase: i * 1.2 });
             }
         }
 
@@ -894,13 +1220,25 @@ class VRController {
     addExitMarkers(exits) {
         const C = VRController.C;
         const positions = {
-            north: { x: 0, z: -5.5, rot: 0 },
-            south: { x: 0, z: 5.5, rot: Math.PI },
-            east: { x: 5.5, z: 0, rot: -Math.PI / 2 },
-            west: { x: -5.5, z: 0, rot: Math.PI / 2 },
-            up: { x: 0, z: 0, rot: 0, isUp: true },
-            down: { x: 0, z: 0, rot: 0, isDown: true }
+            north: { x: 0,    z: -5.5, rot: 0 },
+            south: { x: 0,    z:  5.5, rot: Math.PI },
+            east:  { x:  5.5, z: 0,    rot: -Math.PI / 2 },
+            west:  { x: -5.5, z: 0,    rot:  Math.PI / 2 },
+            up:    { x: 0,    z: 0,    rot: 0, isUp: true },
+            down:  { x: 0,    z: 0,    rot: 0, isDown: true }
         };
+
+        // Determine the visual style for exits based on the current room
+        const room = this.game.currentRoom;
+        const FOREST_ROOMS  = new Set(['castle_gate', 'forest_path', 'forest_clearing', 'deep_forest']);
+        const CLOUD_ROOMS   = new Set(['cloud_realm']);
+        const CAVE_ROOMS    = new Set(['dragon_lair']);
+        // All others (courtyard, throne_room, wizard_tower) → castle style
+
+        let exitStyle = 'castle';
+        if (FOREST_ROOMS.has(room))  exitStyle = 'forest';
+        if (CLOUD_ROOMS.has(room))   exitStyle = 'cloud';
+        if (CAVE_ROOMS.has(room))    exitStyle = 'cave';
 
         for (const [dir, roomId] of Object.entries(exits)) {
             const pos = positions[dir];
@@ -909,57 +1247,200 @@ class VRController {
             const group = new THREE.Group();
 
             if (pos.isUp || pos.isDown) {
-                // Vertical exit marker
+                // ── Vertical exits: beanstalk shimmer or cave drop ──────────
                 const arrow = new THREE.Mesh(
-                    new THREE.ConeGeometry(0.2, 0.4, 6),
-                    this.getEGAMaterial(C.LCYAN, { emissive: true, emissiveIntensity: 0.5 })
+                    new THREE.ConeGeometry(0.22, 0.44, 8),
+                    this.getEGAMaterial(C.LCYAN, { emissive: true, emissiveIntensity: 0.6 })
                 );
-                arrow.position.set(pos.x, pos.isUp ? 2.5 : 0.3, pos.z);
+                arrow.position.set(0, pos.isUp ? 2.6 : 0.3, 0);
                 if (pos.isDown) arrow.rotation.z = Math.PI;
                 group.add(arrow);
                 this.animatedObjects.push({ type: 'bob', mesh: arrow, baseY: arrow.position.y, phase: 0 });
+
+                // Halo ring so beanstalk top is obvious
+                const ring = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.35, 0.04, 6, 14),
+                    this.getEGAMaterial(C.FOREST_GREEN, { emissive: true, emissiveIntensity: 0.4 })
+                );
+                ring.rotation.x = Math.PI / 2;
+                ring.position.set(0, pos.isUp ? 2.1 : 0.7, 0);
+                group.add(ring);
+                this.animatedObjects.push({ type: 'spin', mesh: ring, axis: 'y', speed: 0.4 });
+
+            } else if (exitStyle === 'forest') {
+                // ── Two gnarled tree trunks framing a dirt path gap ──────────
+                // Left trunk
+                const trunkL = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.13, 0.18, 2.8, 7),
+                    this.getEGAMaterial(C.BROWN)
+                );
+                trunkL.position.set(-0.72, 1.4, 0);
+                trunkL.rotation.z = 0.08;
+                group.add(trunkL);
+                // Right trunk
+                const trunkR = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.13, 0.18, 2.8, 7),
+                    this.getEGAMaterial(C.BROWN)
+                );
+                trunkR.position.set(0.72, 1.4, 0);
+                trunkR.rotation.z = -0.08;
+                group.add(trunkR);
+                // Canopy clusters arching over the gap
+                const canopyColors = [C.FOREST_GREEN, C.GREEN, C.DEEP_FOREST];
+                for (let i = 0; i < 5; i++) {
+                    const ox = -0.7 + i * 0.35;
+                    const oy = 2.8 + (i === 2 ? 0.25 : 0);  // slight arch peak in centre
+                    const leaf = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.28 + (i === 2 ? 0.08 : 0), 5, 4),
+                        this.getEGAMaterial(canopyColors[i % canopyColors.length])
+                    );
+                    leaf.position.set(ox, oy, -0.05);
+                    leaf.scale.y = 0.7;
+                    group.add(leaf);
+                }
+                // Dirt path trail on the ground (flat plane strip)
+                const path = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.9, 1.4),
+                    this.getEGAMaterial(C.BROWN, { roughness: 1 })
+                );
+                path.rotation.x = -Math.PI / 2;
+                path.position.set(0, 0.01, 0.3);
+                group.add(path);
+                // Subtle glowing firefly dot at ground level so player knows it's interactive
+                const spark = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.06, 5, 4),
+                    this.getEGAMaterial(C.YELLOW, { emissive: true, emissiveIntensity: 0.9 })
+                );
+                spark.position.set(0, 0.35, -0.1);
+                group.add(spark);
+                this.animatedObjects.push({ type: 'bob', mesh: spark, baseY: spark.position.y, phase: Math.random() * Math.PI * 2, amplitude: 0.12 });
+
+            } else if (exitStyle === 'cloud') {
+                // ── Cloud pillars framing a shimmering pastel gap ───────────
+                for (const side of [-0.75, 0.75]) {
+                    for (let h = 0; h < 4; h++) {
+                        const puff = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.28 + Math.random() * 0.14, 6, 5),
+                            this.getEGAMaterial(C.WHITE, { transparent: true, opacity: 0.82 })
+                        );
+                        puff.position.set(side, 0.4 + h * 0.6, 0);
+                        puff.scale.set(1, 0.65, 0.7);
+                        group.add(puff);
+                    }
+                }
+                // Arch of rainbow colour strips above the gap
+                const rainbowCols = [C.RED, C.ORANGE, C.YELLOW, C.GREEN, C.CYAN, C.MAGENTA];
+                for (let i = 0; i < rainbowCols.length; i++) {
+                    const strip = new THREE.Mesh(
+                        new THREE.TorusGeometry(0.55 + i * 0.09, 0.04, 4, 10, Math.PI),
+                        this.getEGAMaterial(rainbowCols[i], { emissive: true, emissiveIntensity: 0.35 })
+                    );
+                    strip.rotation.x = -Math.PI / 2;
+                    strip.position.set(0, 2.3 - i * 0.04, 0);
+                    group.add(strip);
+                }
+                // Shimmer heart glow
+                const glow = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.18, 7, 6),
+                    this.getEGAMaterial(C.WHITE, { emissive: true, emissiveIntensity: 0.7, transparent: true, opacity: 0.5 })
+                );
+                glow.position.set(0, 1.4, 0);
+                group.add(glow);
+                this.animatedObjects.push({ type: 'pulse', mesh: glow, phase: 0 });
+
+            } else if (exitStyle === 'cave') {
+                // ── Rough jagged rock pillars framing a dark tunnel ──────────
+                // Left pillar — stacked irregular boxes
+                const rockOffsets = [
+                    { x: -0.60, y: 0.3, rz:  0.10, sx: 0.28, sy: 0.6,  sz: 0.30 },
+                    { x: -0.66, y: 0.9, rz: -0.07, sx: 0.24, sy: 0.65, sz: 0.28 },
+                    { x: -0.62, y: 1.5, rz:  0.12, sx: 0.22, sy: 0.6,  sz: 0.26 },
+                    { x: -0.58, y: 2.0, rz: -0.15, sx: 0.20, sy: 0.5,  sz: 0.24 },
+                    { x:  0.60, y: 0.3, rz: -0.10, sx: 0.28, sy: 0.6,  sz: 0.30 },
+                    { x:  0.66, y: 0.9, rz:  0.07, sx: 0.24, sy: 0.65, sz: 0.28 },
+                    { x:  0.62, y: 1.5, rz: -0.12, sx: 0.22, sy: 0.6,  sz: 0.26 },
+                    { x:  0.58, y: 2.0, rz:  0.15, sx: 0.20, sy: 0.5,  sz: 0.24 },
+                ];
+                for (const r of rockOffsets) {
+                    const rock = new THREE.Mesh(
+                        new THREE.BoxGeometry(r.sx, r.sy, r.sz),
+                        this.getEGAMaterial(C.DGRAY)
+                    );
+                    rock.position.set(r.x, r.y, 0);
+                    rock.rotation.z = r.rz;
+                    group.add(rock);
+                }
+                // Stalactites above the opening
+                for (let i = 0; i < 5; i++) {
+                    const stalaX = -0.40 + i * 0.20;
+                    const stala = new THREE.Mesh(
+                        new THREE.ConeGeometry(0.055, 0.18 + Math.abs(i - 2) * 0.06, 4),
+                        this.getEGAMaterial(C.SLATE)
+                    );
+                    stala.position.set(stalaX, 2.35, 0);
+                    stala.rotation.z = Math.PI;
+                    group.add(stala);
+                }
+                // Ember glow at base of tunnel
+                const ember = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.10, 5, 4),
+                    this.getEGAMaterial(C.FIRE_ORANGE, { emissive: true, emissiveIntensity: 1.0, transparent: true, opacity: 0.65 })
+                );
+                ember.position.set(0, 0.18, -0.15);
+                group.add(ember);
+                this.animatedObjects.push({ type: 'pulse', mesh: ember, phase: 0 });
+
             } else {
-                // Archway exit marker
-                const archLeft = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.15, 2.5, 0.15),
-                    this.getEGAMaterial(C.LGRAY)
+                // ── Castle archway (default for indoor castle rooms) ──────────
+                // Left pillar with bevelled edges
+                for (const sx of [-0.62, 0.62]) {
+                    const pillar = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.18, 2.6, 0.18),
+                        this.getEGAMaterial(C.LGRAY)
+                    );
+                    pillar.position.set(sx, 1.3, 0);
+                    group.add(pillar);
+                    // Pillar cap
+                    const cap = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.24, 0.10, 0.24),
+                        this.getEGAMaterial(C.SILVER)
+                    );
+                    cap.position.set(sx, 2.65, 0);
+                    group.add(cap);
+                }
+                // Rounded arch top (series of boxes in an arc)
+                for (let i = 0; i <= 6; i++) {
+                    const t = (i / 6) * Math.PI;
+                    const ax = Math.cos(t) * 0.62;
+                    const ay = 2.6 + Math.sin(t) * 0.42;
+                    const block = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.20, 0.18, 0.16),
+                        this.getEGAMaterial(C.LGRAY)
+                    );
+                    block.position.set(ax, ay, 0);
+                    block.rotation.z = -t + Math.PI / 2;
+                    group.add(block);
+                }
+                // Keystone at arch peak
+                const keystone = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.16, 0.22, 0.16),
+                    this.getEGAMaterial(C.SILVER)
                 );
-                archLeft.position.set(-0.6, 1.25, 0);
-                group.add(archLeft);
-
-                const archRight = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.15, 2.5, 0.15),
-                    this.getEGAMaterial(C.LGRAY)
+                keystone.position.set(0, 3.08, 0);
+                group.add(keystone);
+                // Subtle glow inside the archway
+                const archGlow = new THREE.Mesh(
+                    new THREE.PlaneGeometry(1.0, 2.4),
+                    this.getEGAMaterial(C.LCYAN, { emissive: true, emissiveIntensity: 0.12, transparent: true, opacity: 0.15, side: THREE.DoubleSide })
                 );
-                archRight.position.set(0.6, 1.25, 0);
-                group.add(archRight);
-
-                const archTop = new THREE.Mesh(
-                    new THREE.BoxGeometry(1.35, 0.15, 0.15),
-                    this.getEGAMaterial(C.LGRAY)
-                );
-                archTop.position.set(0, 2.55, 0);
-                group.add(archTop);
-
-                // Direction arrow
-                const arrow = new THREE.Mesh(
-                    new THREE.ConeGeometry(0.12, 0.25, 4),
-                    this.getEGAMaterial(C.LCYAN, { emissive: true, emissiveIntensity: 0.5 })
-                );
-                arrow.rotation.x = -Math.PI / 2;
-                arrow.position.set(0, 1.5, -0.2);
-                group.add(arrow);
-                this.animatedObjects.push({ type: 'pulse', mesh: arrow, phase: 0 });
-
-                // Direction label
-                const label = this.createSmallLabel(dir.toUpperCase());
-                label.position.set(0, 2.8, 0);
-                group.add(label);
+                archGlow.position.set(0, 1.2, 0.02);
+                group.add(archGlow);
+                this.animatedObjects.push({ type: 'pulse', mesh: archGlow, phase: 0 });
             }
 
             group.position.set(pos.x, 0, pos.z);
             group.rotation.y = pos.rot || 0;
-            group.userData.exitDir = dir;
+            group.userData.exitDir  = dir;
             group.userData.exitRoom = roomId;
             group.userData.interactable = true;
             this.roomGroup.add(group);
@@ -1123,6 +1604,56 @@ class VRController {
         // Windows on walls
         for (let i = -3; i <= 3; i += 2) {
             this.addBox(i, 2.2, -5.95, 0.3, 0.5, 0.1, C.DGRAY);
+        }
+
+        // Silver music box near fountain — use golden key to open and get lullaby disc
+        if (!this.game.gameState.musicBoxOpened) {
+            const boxGrp = new THREE.Group();
+            boxGrp.userData.interactable = true;
+            // Main box body
+            const boxBody = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18, 0.12, 0.15),
+                this.getEGAMaterial(VRController.C.SILVER)
+            );
+            boxGrp.add(boxBody);
+            // Lock plate
+            const lockPlate = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.06, 0.02),
+                this.getEGAMaterial(VRController.C.GOLD)
+            );
+            lockPlate.position.set(0, -0.01, 0.076);
+            boxGrp.add(lockPlate);
+            // Glint (small bright sphere)
+            const glint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.015, 6, 6),
+                this.getEGAMaterial(VRController.C.WHITE)
+            );
+            glint.position.set(0, 0.065, 0);
+            boxGrp.add(glint);
+            boxGrp.position.set(1.6, 0.85, -1.3);
+            boxGrp.userData.customInteract = (game, vr) => {
+                const inCourtyard = game.currentRoom === 'courtyard';
+                if (inCourtyard && game.rooms.courtyard.onAction) {
+                    game.rooms.courtyard.onAction(game, 'open', 'music box');
+                }
+                const opened = game.gameState.musicBoxOpened;
+                vr.showVRMessage(opened ? '\u266a Music disc obtained from box!' : 'The box is locked. Need golden key.');
+                if (opened) vr.createRoom();
+            };
+            this.roomGroup.add(boxGrp);
+            this.interactables.push(boxGrp);
+            this.animatedObjects.push({ type: 'float', mesh: boxGrp, baseY: boxGrp.position.y, phase: 0, amplitude: 0.015 });
+        } else if (this.game.objects.lullaby_disc && this.game.objects.lullaby_disc.location === 'courtyard') {
+            // Music box opened — show disc as takeable
+            const disc = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.08, 0.01, 12),
+                this.getEGAMaterial(VRController.C.SILVER)
+            );
+            disc.position.set(1.6, 0.88, -1.3);
+            disc.userData.interactable = true;
+            disc.userData.objectId = 'lullaby_disc';
+            this.roomGroup.add(disc);
+            this.interactables.push(disc);
         }
 
         // Concerned servants running about
@@ -1937,52 +2468,114 @@ class VRController {
             const axisY = gp.axes.length > 3 ? gp.axes[3] : 0;
             const deadzone = 0.15;
 
-            if (handedness === 'left') {
+            if (handedness === 'right') {
+                // Right thumbstick: snap turn
+                const nowSnap = performance.now();
+                if (Math.abs(axisX) > 0.6 && nowSnap - this.lastSnapTime > 300) {
+                    this.cameraRig.rotation.y -= Math.sign(axisX) * this.snapAngle;
+                    this.lastSnapTime = nowSnap;
+                }
+                // A button — inventory
+                if (gp.buttons.length > 4 && gp.buttons[4].value > 0.5) {
+                    const nowA = performance.now();
+                    if (!this._lastInventoryPress || nowA - this._lastInventoryPress > 1200) {
+                        this._lastInventoryPress = nowA;
+                        const names = this.game.inventory
+                            .map(id => this.game.objects[id]?.name)
+                            .filter(Boolean);
+                        const msg = names.length > 0 ? 'Bag: ' + names.join(', ') : 'Bag: Empty';
+                        this.showVRMessage(msg);
+                    }
+                }
+                // B button — save game
+                if (gp.buttons.length > 5 && gp.buttons[5].value > 0.5) {
+                    const nowB = performance.now();
+                    if (!this._lastSavePress || nowB - this._lastSavePress > 1500) {
+                        this._lastSavePress = nowB;
+                        this.game.save();
+                        this.triggerHaptic(source, 0.4, 80);
+                        this.showVRMessage('\u2713 Game saved!');
+                    }
+                }
+            } else if (handedness === 'left') {
                 // Left thumbstick: smooth locomotion
                 if (Math.abs(axisX) > deadzone || Math.abs(axisY) > deadzone) {
-                    // Get camera forward/right vectors
                     const dir = new THREE.Vector3();
                     this.camera.getWorldDirection(dir);
-                    dir.y = 0;
-                    dir.normalize();
-
+                    dir.y = 0; dir.normalize();
                     const right = new THREE.Vector3();
                     right.crossVectors(dir, new THREE.Vector3(0, 1, 0));
-
-                    // Move camera rig
-                    const moveX = axisX * this.moveSpeed * dt;
-                    const moveZ = axisY * this.moveSpeed * dt;
-
-                    this.cameraRig.position.addScaledVector(right, moveX);
-                    this.cameraRig.position.addScaledVector(dir, -moveZ);
-
-                    // Clamp to room bounds
+                    this.cameraRig.position.addScaledVector(right, axisX * this.moveSpeed * dt);
+                    this.cameraRig.position.addScaledVector(dir, -axisY * this.moveSpeed * dt);
                     this.cameraRig.position.x = Math.max(-6, Math.min(6, this.cameraRig.position.x));
                     this.cameraRig.position.z = Math.max(-6, Math.min(6, this.cameraRig.position.z));
-                    this._isMoving = true; // triggers comfort vignette
+                    this._isMoving = true;
                 }
-            } else if (handedness === 'right') {
-                // Right thumbstick: snap turn
-                const now = performance.now();
-                if (Math.abs(axisX) > 0.6 && now - this.lastSnapTime > 300) {
-                    this.cameraRig.rotation.y -= Math.sign(axisX) * this.snapAngle;
-                    this.lastSnapTime = now;
+                // X button — USE aimed interactable
+                if (gp.buttons.length > 4 && gp.buttons[4].value > 0.5) {
+                    const nowX = performance.now();
+                    if (!this._lastUsePress || nowX - this._lastUsePress > 1200) {
+                        this._lastUsePress = nowX;
+                        this._vrButtonAction(source, 'use');
+                    }
+                }
+                // Y button — EXAMINE aimed interactable
+                if (gp.buttons.length > 5 && gp.buttons[5].value > 0.5) {
+                    const nowY = performance.now();
+                    if (!this._lastExaminePress || nowY - this._lastExaminePress > 1200) {
+                        this._lastExaminePress = nowY;
+                        this._vrButtonAction(source, 'examine');
+                    }
                 }
             }
+        }
+    }
 
-            // Face buttons - A (right) / X (left) show inventory in VR
-            if (gp.buttons.length > 4 && gp.buttons[4].value > 0.5) {
-                const now = performance.now();
-                if (!this._lastInventoryPress || now - this._lastInventoryPress > 1200) {
-                    this._lastInventoryPress = now;
-                    const names = this.game.inventory
-                        .map(id => this.game.objects[id]?.name)
-                        .filter(Boolean);
-                    const msg = names.length > 0
-                        ? 'Bag: ' + names.join(', ')
-                        : 'Bag: Empty';
-                    this.showVRMessage(msg);
+    /** Perform examine or use on the interactable currently aimed at */
+    _vrButtonAction(controller, action) {
+        this.tempMatrix.identity().extractRotation(controller.matrixWorld);
+        this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+        this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
+        const allMeshes = [];
+        this.interactables.forEach(obj => {
+            if (obj.userData.interactable) allMeshes.push(obj);
+            obj.traverse(child => { if (child.isMesh) allMeshes.push(child); });
+        });
+        const intersects = this.raycaster.intersectObjects(allMeshes, true);
+        if (!intersects.length) {
+            this.showVRMessage(action === 'examine' ? 'Y: Aim at something to examine' : 'X: Aim at something to use');
+            return;
+        }
+        let target = intersects[0].object;
+        while (target && !target.userData.interactable && target.parent !== this.roomGroup) target = target.parent;
+        if (!target) return;
+
+        if (action === 'examine') {
+            if (target.userData.npcType) {
+                this.showVRMessage('Examining: ' + target.userData.npcType);
+                this.game.parser.examine(target.userData.npcType);
+            } else if (target.userData.objectId) {
+                const obj = this.game.objects[target.userData.objectId];
+                if (obj) {
+                    this.showVRMessage('Examining: ' + obj.name);
+                    this.game.displayText(obj.description);
+                    if (obj.onExamine) obj.onExamine(this.game);
                 }
+            } else if (target.userData.exitDir) {
+                this.showVRMessage('Exit: ' + target.userData.exitDir.toUpperCase());
+            }
+        } else if (action === 'use') {
+            if (target.userData.objectId) {
+                const objId = target.userData.objectId;
+                const obj = this.game.objects[objId];
+                if (obj) {
+                    if (obj.onUse) { obj.onUse(this.game, null); this.showVRMessage('Using: ' + obj.name);
+                    } else { this.showVRMessage('Cannot use: ' + obj.name); }
+                }
+            } else if (target.userData.customInteract) {
+                target.userData.customInteract(this.game, this);
+            } else {
+                this.showVRMessage('Nothing to use there.');
             }
         }
     }
@@ -2026,24 +2619,46 @@ class VRController {
                     if (typeof checkWinCondition === 'function') checkWinCondition();
                 }
             } else if (target && target.userData.npcType) {
-                // Talk to NPC
+                const npcType = target.userData.npcType;
                 const room = this.game.rooms[this.game.currentRoom];
+
+                // Special VR logic for dragon: use lullaby disc if available
+                if (npcType === 'dragon') {
+                    if (this.game.gameState.lullabyUsed) {
+                        this.showVRMessage('Dragon sleeps deeply. Take the pudding!');
+                        this.triggerHaptic(controller, 0.2, 50);
+                    } else if (this.game.hasObject('lullaby_disc')) {
+                        this.triggerHaptic(controller, 0.5, 100);
+                        this.playSFX('pickup');
+                        this.game.objects.lullaby_disc.onUse(this.game, null);
+                        this.showVRMessage('Playing lullaby on dragon... \u266a zzzZZZ');
+                    } else {
+                        this.triggerHaptic(controller, 0.8, 200);
+                        this.showVRMessage('\u26a0 Dragon lightly asleep! Need lullaby disc!');
+                        this.showNPCSpeechBubble(target, 'Zzz... *snorts* ...zzz');
+                    }
+                    return;
+                }
+
+                // Standard NPC talk
                 if (room.onTalk) {
                     this.triggerHaptic(controller, 0.2, 60);
                     this.playSFX('talk');
-                    room.onTalk(this.game, target.userData.npcType);
-                    // Show diegetic speech bubble
+                    room.onTalk(this.game, npcType);
                     const npcGreetings = {
-                        guard: 'The pudding is missing! The King is furious!',
-                        wizard: 'I sneezed mid-spell. Most... embarrassing.',
+                        guard: 'Check the courtyard fountain!',
+                        wizard: 'I sneezed mid-spell. Very embarrassing.',
                         king: 'WHERE IS MY PUDDING?!',
                         gnome: 'Answer my riddle and I may let you pass!',
-                        dragon: 'Zzzzz... *SNOOORE* ...zzz',
                         servant: 'Oh, whatever shall we do?!'
                     };
-                    this.showNPCSpeechBubble(target, npcGreetings[target.userData.npcType] || '...');
-                    this.showVRMessage(`Talking to ${target.userData.npcType}...`);
+                    this.showNPCSpeechBubble(target, npcGreetings[npcType] || '...');
+                    this.showVRMessage(`Talking to ${npcType}... (Y=Examine)`);
                 }
+            } else if (target && target.userData.customInteract) {
+                // Custom interaction (e.g. music box)
+                this.triggerHaptic(controller, 0.4, 80);
+                target.userData.customInteract(this.game, this);
             } else if (target && target.userData.objectId) {
                 // Interact with object
                 const objId = target.userData.objectId;
@@ -2199,7 +2814,10 @@ class VRController {
                     anim.mesh.scale.setScalar(0.9 + Math.sin(time * 12 + anim.phase) * 0.15);
                     break;
                 case 'bob':
-                    anim.mesh.position.y = anim.baseY + Math.sin(time * 2 + anim.phase) * 0.15;
+                    anim.mesh.position.y = anim.baseY + Math.sin(time * 2 + anim.phase) * (anim.amplitude !== undefined ? anim.amplitude : 0.15);
+                    break;
+                case 'spin':
+                    anim.mesh.rotation[anim.axis || 'y'] = time * (anim.speed || 0.5);
                     break;
                 case 'pulse':
                     const scale = 0.8 + Math.sin(time * 3 + anim.phase) * 0.2;

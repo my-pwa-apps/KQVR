@@ -9,12 +9,15 @@ class GameEngine {
         this.gameState = {
             hasKey: false,
             dragonAsleep: false,
+            dragonDeepAsleep: false,
+            lullabyUsed: false,
             wizardHappy: false,
             gnomeHelped: false,
             hasMagicBean: false,
             beanstalkGrown: false,
+            musicBoxOpened: false,
             score: 0,
-            maxScore: 150
+            maxScore: 175
         };
         this.commandHistory = [];
         this.rooms = {};
@@ -490,122 +493,185 @@ class GameEngine {
         this.gameState.score += points;
         this.displayText(`♪ [Score: ${this.gameState.score}/${this.gameState.maxScore}]`, '#FFFF55');
     }
+
+    /** Persist game state to localStorage */
+    save() {
+        const saveData = {
+            currentRoom: this.currentRoom,
+            inventory: [...this.inventory],
+            gameState: { ...this.gameState },
+            objectLocations: {},
+            roomExits: {}
+        };
+        for (const id in this.objects) {
+            saveData.objectLocations[id] = this.objects[id].location;
+        }
+        for (const roomId in this.rooms) {
+            saveData.roomExits[roomId] = { ...this.rooms[roomId].exits };
+        }
+        try {
+            localStorage.setItem('kqvr_save', JSON.stringify(saveData));
+            this.displayText("Game saved! The royal archivist nods approvingly.", '#FFFF55');
+        } catch (e) {
+            this.displayText("Save failed! A dragon sneezed on the memory.", '#FF5555');
+        }
+    }
+
+    /** Restore game state from localStorage */
+    load() {
+        const raw = localStorage.getItem('kqvr_save');
+        if (!raw) {
+            this.displayText("No saved game found. Type SAVE to save first.", '#FF5555');
+            return;
+        }
+        try {
+            const data = JSON.parse(raw);
+            this.currentRoom = data.currentRoom;
+            this.inventory = data.inventory || [];
+            Object.assign(this.gameState, data.gameState || {});
+            for (const id in (data.objectLocations || {})) {
+                if (this.objects[id]) this.objects[id].location = data.objectLocations[id];
+            }
+            for (const roomId in (data.roomExits || {})) {
+                if (this.rooms[roomId]) Object.assign(this.rooms[roomId].exits, data.roomExits[roomId]);
+            }
+            this.displayText("Game loaded! The pudding awaits.", '#FFFF55');
+            this.enterRoom(this.currentRoom);
+        } catch (e) {
+            this.displayText("Save data corrupted. The wizard sneezed on it.", '#FF5555');
+        }
+    }
+
+    /** Sierra-style death: humorous text, then respawn in current room */
+    die(message) {
+        const quips = [
+            "You have died. This is Sierra, after all.",
+            "Your adventure ends here. Briefly.",
+            "The kingdom mourns. Once they finish mourning the pudding.",
+            "Death came for you quite... promptly.",
+            "You are no longer among the living. Temporarily."
+        ];
+        this.displayText("\n\u2620  " + message, '#FF5555');
+        this.displayText(quips[Math.floor(Math.random() * quips.length)], '#FF5555');
+        this.displayText("\nThe wizard Ignatius sighs and casts a quick revival spell.", '#AAAAAA');
+        this.displayText("'Not my fault this time,' he mutters.", '#AAAAAA');
+        this.displayText("You wake up, slightly singed but alive.\n", '#AAAAAA');
+        setTimeout(() => this.enterRoom(this.currentRoom), 1400);
+    }
+
+    /** Restart — reload page for simplicity */
+    restart() {
+        this.displayText("The wizard hiccups. The world resets...", '#AAAAAA');
+        setTimeout(() => window.location.reload(), 800);
+    }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Command Parser
+// ─────────────────────────────────────────────────────────────────────────────
 class CommandParser {
     constructor(game) {
         this.game = game;
-        this.verbs = ['go', 'get', 'take', 'drop', 'look', 'examine', 'use', 'open', 
-                      'close', 'talk', 'give', 'inventory', 'help', 'north', 'south', 
-                      'east', 'west', 'up', 'down', 'climb', 'eat', 'drink'];
+        this._confusedLines = [
+            "I don't understand that. (Type HELP for commands)",
+            "That verb isn't in this kingdom.",
+            "Even the castle gargoyles look puzzled by that.",
+            "The parser stares at you blankly.",
+            "Try something like: EXAMINE FOUNTAIN or TAKE KEY",
+            "Your lips moved but nothing game-mechanical happened.",
+            "The wizard could parse that, but he's busy apologising.",
+        ];
+        this._confusedIdx = 0;
     }
     
     parse(input) {
         const words = input.toLowerCase().trim().split(/\s+/);
         const verb = words[0];
         const noun = words.slice(1).join(' ');
-        
         let redraw = false;
-        
-        // Handle direction shortcuts
-        if (['n', 'north'].includes(verb)) {
-            redraw = this.move('north');
-        } else if (['s', 'south'].includes(verb)) {
-            redraw = this.move('south');
-        } else if (['e', 'east'].includes(verb)) {
-            redraw = this.move('east');
-        } else if (['w', 'west'].includes(verb)) {
-            redraw = this.move('west');
-        } else if (['u', 'up'].includes(verb)) {
-            redraw = this.move('up');
-        } else if (['d', 'down'].includes(verb)) {
-            redraw = this.move('down');
-        } else if (verb === 'go' && noun) {
-            redraw = this.move(noun);
-        } else if (['get', 'take'].includes(verb)) {
-            this.take(noun);
-        } else if (verb === 'drop') {
-            this.drop(noun);
+
+        if (['n', 'north'].includes(verb))       { redraw = this.move('north');
+        } else if (['s', 'south'].includes(verb)){ redraw = this.move('south');
+        } else if (['e', 'east'].includes(verb)) { redraw = this.move('east');
+        } else if (['w', 'west'].includes(verb)) { redraw = this.move('west');
+        } else if (['u', 'up'].includes(verb))   { redraw = this.move('up');
+        } else if (['d', 'down'].includes(verb)) { redraw = this.move('down');
+        } else if (verb === 'go' && noun)        { redraw = this.move(noun);
+        } else if (['get', 'take', 'pick', 'grab'].includes(verb))     { this.take(noun);
+        } else if (['drop', 'leave', 'put'].includes(verb))             { this.drop(noun);
         } else if (['look', 'l'].includes(verb)) {
-            if (noun) {
-                this.examine(noun);
-            } else {
-                // enterRoom calls drawRoom internally; no separate redraw needed
-                this.game.enterRoom(this.game.currentRoom);
-            }
-        } else if (['examine', 'x'].includes(verb)) {
-            this.examine(noun);
-        } else if (verb === 'use') {
-            this.use(noun);
-        } else if (['inventory', 'i'].includes(verb)) {
-            this.showInventory();
-        } else if (verb === 'help') {
-            this.showHelp();
-        } else if (verb === 'talk') {
-            this.talk(noun);
-        } else if (verb === 'give') {
-            this.give(noun);
-        } else if (verb === 'eat') {
-            this.eat(noun);
-        } else if (verb === 'climb') {
-            this.climb(noun);
-        } else {
-            this.game.displayText("I don't understand that. (Type HELP for commands)");
-        }
-        
+            if (noun) this.examine(noun);
+            else      this.game.enterRoom(this.game.currentRoom);
+        } else if (['examine', 'x', 'inspect', 'check'].includes(verb)){ this.examine(noun);
+        } else if (['read', 'peruse', 'study', 'decipher'].includes(verb)){ this.examine(noun);
+        } else if (['use', 'apply', 'activate'].includes(verb))         { this.use(noun);
+        } else if (['open', 'unlock'].includes(verb))                   { this.open(noun);
+        } else if (['inventory', 'i', 'inv', 'bag', 'items'].includes(verb)){ this.showInventory();
+        } else if (['help', '?', 'commands'].includes(verb))            { this.showHelp();
+        } else if (['talk', 'speak', 'ask', 'tell', 'chat'].includes(verb)){ this.talk(noun);
+        } else if (verb === 'give')                                     { this.give(noun);
+        } else if (['eat', 'drink', 'taste', 'lick'].includes(verb))   { this.eat(noun);
+        } else if (['climb', 'scale', 'ascend'].includes(verb))        { this.climb(noun);
+        } else if (['smell', 'sniff'].includes(verb))                   { this.smell(noun);
+        } else if (['knock', 'tap', 'bang'].includes(verb))            { this.knock(noun);
+        } else if (['push', 'press', 'shove'].includes(verb))          { this.push(noun);
+        } else if (['pull', 'yank', 'drag'].includes(verb))            { this.pull(noun);
+        } else if (['listen', 'hear', 'hark'].includes(verb))          { this.listen(noun);
+        } else if (['throw', 'toss', 'hurl'].includes(verb))           { this.throwItem(noun);
+        } else if (['wait', 'z', 'rest', 'pause'].includes(verb))      { this.wait();
+        } else if (['sit', 'nap', 'sleep', 'lie'].includes(verb))      { this.sit(noun);
+        } else if (['wave', 'greet', 'bow'].includes(verb))            { this.wave(noun);
+        } else if (['save', 'savegame'].includes(verb))                { this.game.save();
+        } else if (['load', 'loadgame', 'restore'].includes(verb))     { this.game.load();
+        } else if (['restart', 'reset', 'newgame'].includes(verb))     { this.game.restart();
+        } else { this.noVerb(); }
+
         return { redraw };
     }
     
     move(direction) {
         const room = this.game.rooms[this.game.currentRoom];
         const nextRoom = room.exits[direction];
-        
         if (nextRoom) {
-            // Check for special conditions
             if (room.exitConditions && room.exitConditions[direction]) {
                 const condition = room.exitConditions[direction];
-                if (!condition(this.game.gameState)) {
-                    return false;
-                }
+                if (!condition(this.game.gameState)) return false;
             }
-            
             this.game.enterRoom(nextRoom);
             return true;
         } else {
-            this.game.displayText("You can't go that way.");
+            const blocked = [
+                "You can't go that way.",
+                "A solid wall disagrees with your travel plans.",
+                "Nothing but stone in that direction.",
+            ];
+            this.game.displayText(blocked[Math.floor(Math.random() * blocked.length)]);
             return false;
         }
     }
     
     take(noun) {
-        if (!noun) {
-            this.game.displayText("Take what?");
-            return;
-        }
-        
+        if (!noun) { this.game.displayText("Take what? The open air?"); return; }
+        // Let the room intercept special take actions first
+        const room = this.game.rooms[this.game.currentRoom];
+        if (room.onAction && room.onAction(this.game, 'take', noun)) return;
         const objectId = this.findObject(noun, this.game.currentRoom);
         if (objectId) {
             const obj = this.game.objects[objectId];
             if (obj.takeable) {
                 this.game.addToInventory(objectId);
-                if (obj.onTake) {
-                    obj.onTake(this.game);
-                }
+                if (obj.onTake) obj.onTake(this.game);
             } else {
-                this.game.displayText("You can't take that!");
+                this.game.displayText("You can't take that! (Believe me, you tried.)");
             }
         } else {
-            this.game.displayText("You don't see that here.");
+            const nope = ["You don't see that here.", "Nothing matching that is visible.", "You reach for it, but grasp only air."];
+            this.game.displayText(nope[Math.floor(Math.random() * nope.length)]);
         }
     }
     
     drop(noun) {
-        if (!noun) {
-            this.game.displayText("Drop what?");
-            return;
-        }
-        
+        if (!noun) { this.game.displayText("Drop what?"); return; }
         const objectId = this.findObject(noun, 'inventory');
         if (objectId) {
             const obj = this.game.objects[objectId];
@@ -618,89 +684,187 @@ class CommandParser {
     }
     
     examine(noun) {
-        if (!noun) {
-            this.game.displayText("Examine what?");
-            return;
-        }
-        
+        if (!noun) { this.game.displayText("Examine what, exactly?"); return; }
+        // Check inventory and room objects first
         const objectId = this.findObject(noun);
         if (objectId) {
             const obj = this.game.objects[objectId];
             this.game.displayText(obj.description);
-            if (obj.onExamine) {
-                obj.onExamine(this.game);
-            }
-        } else {
-            this.game.displayText("You don't see anything special about that.");
+            if (obj.onExamine) obj.onExamine(this.game);
+            return;
         }
+        // Check room's named examine targets
+        const room = this.game.rooms[this.game.currentRoom];
+        if (room.examineTargets) {
+            const words = noun.toLowerCase().split(/\s+/);
+            for (const [key, response] of Object.entries(room.examineTargets)) {
+                const keys = key.toLowerCase().split(/[,|\s]+/).filter(Boolean);
+                if (words.some(w => keys.some(k => k === w || k.startsWith(w) || w.startsWith(k)))) {
+                    if (typeof response === 'function') response(this.game);
+                    else this.game.displayText(response);
+                    return;
+                }
+            }
+        }
+        // Room-level fallback
+        if (room.onAction && room.onAction(this.game, 'examine', noun)) return;
+        const dunno = [
+            "You don't see anything special about that.",
+            "Nothing remarkable there. Move along.",
+            "You stare at it intently. It remains unremarkable.",
+        ];
+        this.game.displayText(dunno[Math.floor(Math.random() * dunno.length)]);
     }
     
     use(noun) {
-        if (!noun) {
-            this.game.displayText("Use what?");
-            return;
+        if (!noun) { this.game.displayText("Use what?"); return; }
+        // Parse "use X on Y" pattern
+        let itemNoun = noun, targetNoun = null;
+        const onIdx = noun.indexOf(' on ');
+        if (onIdx > -1) {
+            itemNoun = noun.slice(0, onIdx).trim();
+            targetNoun = noun.slice(onIdx + 4).trim();
         }
-        // Only match items the player carries or can see in the current room
-        const objectId = this.findObject(noun, 'inventory')
-                      || this.findObject(noun, this.game.currentRoom);
+        const objectId = this.findObject(itemNoun, 'inventory') || this.findObject(itemNoun, this.game.currentRoom);
         if (objectId) {
             const obj = this.game.objects[objectId];
-            if (obj.onUse) {
-                obj.onUse(this.game);
-            } else {
-                this.game.displayText("You're not sure how to use that here.");
-            }
-        } else {
-            this.game.displayText("You don't see that here.");
+            if (obj.onUse) { obj.onUse(this.game, targetNoun); return; }
         }
+        const room = this.game.rooms[this.game.currentRoom];
+        if (room.onAction && room.onAction(this.game, 'use', itemNoun, targetNoun)) return;
+        if (objectId) this.game.displayText("You're not sure how to use that here.");
+        else this.game.displayText("You don't see that here.");
     }
     
+    open(noun) {
+        if (!noun) { this.game.displayText("Open what?"); return; }
+        let target = noun, tool = null;
+        const withIdx = noun.indexOf(' with '), usingIdx = noun.indexOf(' using ');
+        if (withIdx > -1)  { target = noun.slice(0, withIdx).trim(); tool = noun.slice(withIdx + 6).trim(); }
+        else if (usingIdx > -1) { target = noun.slice(0, usingIdx).trim(); tool = noun.slice(usingIdx + 7).trim(); }
+        const room = this.game.rooms[this.game.currentRoom];
+        if (room.onAction && room.onAction(this.game, 'open', target, tool)) return;
+        this.game.displayText("You can't open that.");
+    }
+
     talk(noun) {
         const room = this.game.rooms[this.game.currentRoom];
         if (room.onTalk) {
-            room.onTalk(this.game, noun);
+            room.onTalk(this.game, noun || '');
         } else {
-            this.game.displayText("There's nobody here to talk to.");
+            const lonely = ["There's nobody here to talk to.", "The walls don't respond. (You tried.)", "Hello? ... Only echoes reply."];
+            this.game.displayText(lonely[Math.floor(Math.random() * lonely.length)]);
         }
     }
-    
+
     give(noun) {
         const room = this.game.rooms[this.game.currentRoom];
-        if (room.onGive) {
-            room.onGive(this.game, noun);
-        } else {
-            this.game.displayText("There's nobody here to give anything to.");
-        }
+        if (room.onGive) room.onGive(this.game, noun);
+        else this.game.displayText("There's nobody here to give anything to.");
     }
-    
+
     eat(noun) {
-        if (!noun) {
-            this.game.displayText("Eat what?");
-            return;
-        }
-        
-        this.game.displayText("That's not food! (Well, not for you anyway.)");
+        if (!noun) { this.game.displayText("Eat what?"); return; }
+        const eatFunny = [
+            "That's not food! (Well, not for you anyway.)",
+            "You resist the urge to eat that.",
+            "Your stomach politely declines.",
+            "The food critics of the kingdom would rate that: inedible.",
+        ];
+        this.game.displayText(eatFunny[Math.floor(Math.random() * eatFunny.length)]);
     }
-    
+
     climb(noun) {
-        if (!noun) {
-            this.game.displayText("Climb what?");
-            return;
-        }
-        
+        if (!noun) { this.game.displayText("Climb what?"); return; }
         const room = this.game.rooms[this.game.currentRoom];
-        if (room.onClimb) {
-            room.onClimb(this.game, noun);
+        if (room.onClimb) room.onClimb(this.game, noun);
+        else this.game.displayText("You can't climb that. (You tried. Gravity won.)");
+    }
+
+    smell(noun) {
+        const smells = {
+            dragon: "Sulphur, smoke, and unwashed scales. Very pungent.",
+            pudding: "OH. That smell. Butter, vanilla, and pure triumph. Must retrieve pudding IMMEDIATELY.",
+            wizard: "Burnt parchment, exotic herbs, and a faint undercurrent of regret.",
+            fountain: "Cold stone and clean water. Refreshingly boring.",
+            gnome: "Earth, pipe smoke, and someone who has not bathed since the last riddle.",
+            forest: "Rich loam, ancient wood, and something faintly magical.",
+            cloud: "Vanilla! Wait — clouds smell like vanilla here? Magic is weird.",
+            mushroom: "A curiously soporific aroma. Notes of sleeping draught and woodland damp.",
+        };
+        const key = Object.keys(smells).find(k => noun?.includes(k)) || '';
+        this.game.displayText(smells[key] || "You take a deep whiff. Notes of adventure, stone dust, and something vaguely pudding-adjacent.");
+    }
+
+    knock(noun) {
+        if (!noun) { this.game.displayText("Knock on what? Your own head?"); return; }
+        const room = this.game.rooms[this.game.currentRoom];
+        if (room.onAction && room.onAction(this.game, 'knock', noun)) return;
+        this.game.displayText("You knock. Nothing answers. Probably for the best.");
+    }
+
+    push(noun) {
+        if (!noun) { this.game.displayText("Push what?"); return; }
+        const p = [`You push the ${noun}. It pushes back (philosophically).`, `The ${noun} wobbles slightly, then settles back.`, `Pushing it accomplishes nothing. (You note this for posterity.)`, `The universe remains indifferent.`];
+        this.game.displayText(p[Math.floor(Math.random() * p.length)]);
+    }
+
+    pull(noun) {
+        if (!noun) { this.game.displayText("Pull what?"); return; }
+        const p = [`You pull on the ${noun}. Mild strain ensues.`, `The ${noun} resists. You don't insist.`, `You give it a firm tug. It remains smugly in place.`];
+        this.game.displayText(p[Math.floor(Math.random() * p.length)]);
+    }
+
+    listen(noun) {
+        const room = this.game.rooms[this.game.currentRoom];
+        if (room.onAction && room.onAction(this.game, 'listen', noun)) return;
+        const l = ["You listen carefully. Birds, distant wind, and your own heartbeat.", "The world hums with quiet mystery — or possibly just the fountain.", "You strain your ears. Not quite enough plot is happening to generate sound."];
+        this.game.displayText(l[Math.floor(Math.random() * l.length)]);
+    }
+
+    throwItem(noun) {
+        if (!noun) { this.game.displayText("Throw what?"); return; }
+        const objId = this.findObject(noun, 'inventory');
+        if (objId) {
+            this.game.displayText(`You hurl the ${this.game.objects[objId].name} with gusto.`);
+            this.game.displayText("It bounces off the wall and lands at your feet. Anticlimactic.");
+        } else { this.game.displayText("You don't have that to throw."); }
+    }
+
+    wait() {
+        const w = ["Time passes. Nothing happens. The pudding remains missed.", "You wait. A breeze stirs. The kingdom holds its breath.", "Five seconds of valuable adventure time: elapsed.", "You twirl your thumbs. Somewhere, a king grows hungrier."];
+        this.game.displayText(w[Math.floor(Math.random() * w.length)]);
+    }
+
+    sit(noun) {
+        if (this.game.currentRoom === 'throne_room') {
+            this.game.displayText("You consider sitting on the King's throne.");
+            this.game.displayText("The King drums his fingers. Very. Loudly. You wisely reconsider.");
         } else {
-            this.game.displayText("You can't climb that.");
+            const s = ["You sit down briefly, then remember you're on a quest.", "The ground is harder than it looks. You stand back up.", "You sit. Nothing in particular happens. You stand."];
+            this.game.displayText(s[Math.floor(Math.random() * s.length)]);
         }
     }
-    
+
+    wave(noun) {
+        if (!noun) { this.game.displayText("You wave at the air. The air does not wave back."); return; }
+        this.game.displayText(`You wave at the ${noun}. They look mildly puzzled.`);
+    }
+
+    noVerb() {
+        this.game.displayText(this._confusedLines[this._confusedIdx % this._confusedLines.length]);
+        this._confusedIdx++;
+    }
+
     findObject(noun, location = null) {
+        if (!noun) return null;
+        const lnoun = noun.toLowerCase();
         for (let objId in this.game.objects) {
             const obj = this.game.objects[objId];
-            if (obj.name.toLowerCase().includes(noun) || obj.aliases?.some(a => a.includes(noun))) {
-                if (location === null || obj.location === location || 
+            const nameMatch = obj.name.toLowerCase().includes(lnoun);
+            const aliasMatch = obj.aliases?.some(a => a.toLowerCase().includes(lnoun));
+            if (nameMatch || aliasMatch) {
+                if (location === null || obj.location === location ||
                     (location === 'inventory' && this.game.hasObject(objId))) {
                     return objId;
                 }
@@ -708,30 +872,35 @@ class CommandParser {
         }
         return null;
     }
-    
+
     showInventory() {
         if (this.game.inventory.length === 0) {
-            this.game.displayText("You are empty-handed.");
+            this.game.displayText("You are empty-handed. (Just like your quest, so far.)");
         } else {
             this.game.displayText("You are carrying:");
             this.game.inventory.forEach(objId => {
-                this.game.displayText("  - " + this.game.objects[objId].name);
+                this.game.displayText("  \u25ba " + this.game.objects[objId].name);
             });
         }
     }
-    
+
     showHelp() {
-        this.game.displayText("\n╔═══════════════════════════════╗", '#00AAAA');
-        this.game.displayText("║         COMMANDS              ║", '#00AAAA');
-        this.game.displayText("╚═══════════════════════════════╝", '#00AAAA');
-        this.game.displayText("Movement: NORTH, SOUTH, EAST, WEST, UP, DOWN");
-        this.game.displayText("          (or N, S, E, W, U, D)");
-        this.game.displayText("Actions:  LOOK, EXAMINE [obj], GET/TAKE [obj]");
-        this.game.displayText("          DROP [obj], USE [obj], TALK [person]");
-        this.game.displayText("          GIVE [obj], INVENTORY (or I)");
-        this.game.displayText("VR Mode:  Click 'Enter VR Mode' for Quest 3s!");
-        this.game.displayText("          Point & click to interact in VR");
-        this.game.displayText("\nRemember: This is a Sierra game. Save early, save often!");
-        this.game.displayText("(Just kidding, you can't die... probably.)\n");
+        this.game.displayText("\n\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557", '#00AAAA');
+        this.game.displayText("\u2551       KING'S QUEST VR  \u2502 COMMANDS      \u2551", '#00AAAA');
+        this.game.displayText("\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563", '#00AAAA');
+        this.game.displayText("\u2551 Move: N S E W U D  (or full word)       \u2551", '#00AAAA');
+        this.game.displayText("\u2551 LOOK [thing]   EXAMINE/X [thing]        \u2551", '#00AAAA');
+        this.game.displayText("\u2551 TAKE [item]    DROP [item]               \u2551", '#00AAAA');
+        this.game.displayText("\u2551 USE [item]     USE [item] ON [target]    \u2551", '#00AAAA');
+        this.game.displayText("\u2551 OPEN [thing]   TALK [person]             \u2551", '#00AAAA');
+        this.game.displayText("\u2551 GIVE [item]    INVENTORY / I             \u2551", '#00AAAA');
+        this.game.displayText("\u2551 SMELL [thing]  LISTEN  WAIT/Z            \u2551", '#00AAAA');
+        this.game.displayText("\u2551 SAVE           LOAD     RESTART          \u2551", '#00AAAA');
+        this.game.displayText("\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563", '#00AAAA');
+        this.game.displayText("\u2551 VR: Trigger=Action  A=Inventory         \u2551", '#00AAAA');
+        this.game.displayText("\u2551     Y=Examine        X=Use     B=Save   \u2551", '#00AAAA');
+        this.game.displayText("\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d", '#00AAAA');
+        this.game.displayText("TIP: Type EXAMINE things — clues are everywhere!", '#FFFF55');
+        this.game.displayText("TIP: SAVE often! (Sierra games can be fatal.)\n", '#FFFF55');
     }
 }
